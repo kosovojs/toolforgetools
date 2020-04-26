@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="cee-atsev.js"></script>
+<title>CEE pec valsts</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<span id="dumpres"></span>
+<span id="select1"></span>
+<span id="ToC"></span>
+<span id="fdfsdfoobarlorem12312dsfdf12"></span>
+<script>
+var countrylist = [
+	{'name':'Albānija','projects':['Albanie']},
+	{'name':'Armēnija','projects':['Arménie']},
+	{'name':'Austrija','projects':['Autriche','Innsbruck','Vienne_(Autriche)','Empire_autrichien']},
+	{'name':'Azerbaidžāna','projects':['Azerbaïdjan','Bakou']},
+	{'name':'Baltkrievija','projects':['Biélorussie']},
+	{'name':'Bosnija-Her','projects':['Bosnie-Herzégovine']},
+	{'name':'Bulgārija','projects':['Bulgarie']},
+	{'name':'Čehija','projects':['République_tchèque','Tchécoslovaquie','Prague']},
+	{'name':'Gruzija','projects':['Géorgie_(pays)']},
+	{'name':'Horvātija','projects':['Croatie']},
+	{'name':'Maķedonija','projects':['Macédoine','Skopje']},
+	{'name':'Moldāvija','projects':['Moldavie']},
+	{'name':'Rumānija','projects':['Roumanie','Bucarest']},
+	{'name':'Serbija','projects':['Serbie','Belgrade']},
+	{'name':'Slovākija','projects':['Slovaquie','Bratislava','Košice']},
+	{'name':'Ungārija','projects':['Hongrie','Budapest']},
+	{'name':'Grieķija','projects':['Grèce','Athènes','Crète','Grèce_antique']},
+	{'name':'Kazakhstan','projects':['Kazakhstan']},
+	{'name':'Chypre','projects':['Chypre']},
+	{'name':'Kosovo','projects':['Kosovo']},
+	{'name':'Monténégro','projects':['Monténégro']},
+	{'name':'Slovénie','projects':['Slovénie']},
+	{'name':'Turcija','projects':['Turquie','Istanbul','Empire_ottoman']},
+	{'name':'Igaunija','projects':['Estonie','Tallinn']},
+	{'name':'Lituanie','projects':['Lituanie']},
+	{'name':'Polija','projects':['Pologne','Varsovie','Cracovie']},
+	{'name':'Ukraine','projects':['Ukraine']},
+	{'name':'RUS','projects':['Russie','Sibérie','Moscou','Oblast_de_Novossibirsk','Saint-Pétersbourg','Sotchi','Empire_russe','URSS']}
+];
+Array.prototype.unique = function() {
+  return this.filter(function (value, index, self) { 
+    return self.indexOf(value) === index;
+  });
+}
+
+function compare(a, b){
+  let comparison = 0;
+
+  if (a > b) {
+    comparison = 1;
+  } else if (b > a) {
+    comparison = -1;
+  }
+
+  return comparison;
+}
+
+function compare1(a, b){
+  let comparison = 0;
+  a = parseInt(a[1]);
+  b = parseInt(b[1]);
+
+  if (a > b) {
+    comparison = -1;
+  } else if (b > a) {
+    comparison = 1;
+  }
+
+  return comparison;
+}
+
+function make_ToC(data) {
+	var toc = [];
+	
+	toc.push('<div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;"><ul>');
+	
+	for (i = 0; i < data.length; i++) {
+		toc.push('<li><a href="#'+data[i]+'">'+data[i]+'</a></li>');
+	}
+	toc.push('</ul></div>');
+	
+	$('#ToC').html(toc.join('\n'));
+}
+	
+
+function push_to_arr(arr,key,val) {
+	if (key in arr) {
+		arr[key].push(val);
+	} else {
+		arr[key] = [val];
+	}
+	
+	return arr
+}
+
+function get_unique_key_values(data1) {
+	var keys = [];
+
+	for (i = 0; i < data1.length; i++) {
+		var infs = data1[i][2];
+		
+		for (z = 0; z < infs.length; z++) {
+			if (!(infs[z] in keys)) {
+				keys.push(infs[z]);
+			}
+		}
+	}
+	
+	keys = keys.unique().sort(compare);//a.toLowerCase()-b.toLowerCase()});//fix sorting
+	
+	//console.log(keys);
+	
+	return keys
+}
+
+
+function sort_by_key(data1) {
+	keys = get_unique_key_values(data1);
+	var arr1 = {};
+	
+	for (i = 0; i < data1.length; i++) {
+		var infs = data1[i][2];
+		
+		for (z = 0; z < infs.length; z++) {
+			push_to_arr(arr1,infs[z],[data1[i][0],data1[i][1]]);
+			
+			//arr1[infs[z]].push([data1[i][0],data1[i][1]]);
+		}
+	}
+	console.log(arr1);
+	
+	return arr1
+}
+
+function create_select(select_data) {
+/*<select>
+  <option value="volvo">Volvo</option>
+  <option value="saab">Saab</option>
+  <option value="mercedes">Mercedes</option>
+  <option value="audi">Audi</option>
+</select> 
+*/	
+	var aaa = [];
+	aaa.push('<select>');
+	for (i = 0; i < select_data.length; i++) {
+		aaa.push('<option value="'+select_data[i]['name']+'">'+select_data[i]['name']+'</option>');
+	}
+	aaa.push('</select>');
+	
+	return aaa.join('');
+}
+var bad_infs = ['Infobox_Subdivision_administrative','Infobox_Personnalité_politique','Infobox_Footballeur','Infobox_Joueur_de_tennis'];
+
+function main(data1,max_entries) {
+	var cur_counts = {};
+	var aaa = [];
+	//console.log(data1);
+	
+	var check_max_entries = true;
+	var group_by_infs = true;
+	
+	if (group_by_infs) {
+		var sorted_input = sort_by_key(data1);
+		//$('#dumpres').html(JSON.stringify(sorted_input));
+		var keys = get_unique_key_values(data1);
+		//console.log(keys.toString());
+		
+		make_ToC(keys);
+		
+		
+	for (i = 0; i < keys.length; i++) {
+	//for (var key in sorted_input) {
+		//console.log(sorted_input[keys[i]]);
+		
+		var data_for_table = sorted_input[keys[i]];
+		aaa.push('<a id="'+keys[i]+'"></a><h3>'+keys[i]+'</h3>');
+		if (data_for_table.length>20)
+			aaa.push('<div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;">');
+		aaa.push('<ul>');
+		
+		data_for_table = data_for_table.sort(compare1);
+		
+		for (y = 0; y < data_for_table.length; y++) {
+			aaa.push('<li>'+create_wp_link('en',data_for_table[y][0],data_for_table[y][0])+' - '+data_for_table[y][1]+'</li>');
+		}
+		aaa.push('</ul>');
+		if (data_for_table.length>20)
+			aaa.push('</div>');
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+		
+	} else {
+		aaa.push('<div style="clear:both;"></div><div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;"><ul>');
+		for (i = 0; i < data1.length; i++) {
+			if (i===max_entries) {break;}
+			
+			var infs = data1[i][2];
+			
+			var good_article = true;
+			
+			for (zzz = 0; zzz < bad_infs.length; zzz++) {
+				if (infs.indexOf(bad_infs[zzz]) > -1) { 
+					good_article = false;
+					break;
+				}
+			}
+			
+			if (good_article)
+				aaa.push('<li>'+create_wp_link('en',data1[i][0],data1[i][0])+' - '+data1[i][1]+'</li>');
+		}
+	}
+	
+	//console.log(cur_counts);
+	
+	if (group_by_infs) {
+		return aaa.join('')+'';
+	} else {
+		return aaa.join('')+'</ul></div>';
+	}
+}
+
+function create_link(site,href,label) {
+	if (site=='d') {
+		return '<a href="https://www.wikidata.org/wiki/'+href+'">'+label+'</a>'
+	} else if (site=='sr') {
+		return '<a href="http://www.sports-reference.com/olympics/athletes/'+href+'.html">'+label+' <small>('+href+')</small></a>'
+	}
+}
+
+function one_big_section(cur_data,this_data) {
+	for (a = 0; a < this_data.length; a++) {
+		var thisarticle = this_data[a]['en'];
+		if (!(thisarticle in cur_data)) {
+			cur_data[thisarticle] = [this_data[a]['iw'],this_data[a]['infoboxes']];
+		}
+	}
+	
+	return cur_data;
+}
+
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_wp_link(lang,href,label) {
+	return '<a href="https://'+lang+'.wikipedia.org/wiki/'+href+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+function update(selected_project) {
+	var bigone = [];
+	
+	for (i = 0; i < countrylist.length; i++) {
+		if (!(selected_project==countrylist[i]['name'])) {continue;}
+		
+		theseprojects = countrylist[i]['projects']
+		
+		break;
+	}
+	
+	var thisarticlelist = {};
+	for (ddd = 0; ddd < theseprojects.length; ddd++) {
+		thisarticlelist = one_big_section(thisarticlelist,data[theseprojects[ddd]]);
+	}
+	
+	numeric_array = [];
+	
+	for ( var item in thisarticlelist ){
+		numeric_array.push( [item, thisarticlelist[ item ][0],thisarticlelist[ item ][1]] );
+	}
+	
+	bigone.push('<h2>'+selected_project+'</h2>');
+	bigone.push(main(numeric_array,5000));
+	
+	return bigone;
+}
+
+//console.log(bigone);
+
+$(document).ready(function () {
+	$('#select1').html(create_select(countrylist));
+	$('#select1').on('change', function() {
+		//console.log( this.value );
+		$( "#select1 option:selected" ).each(function() {
+			console.log($(this).attr('value'));
+			$('#fdfsdfoobarlorem12312dsfdf12').html('');
+			var resdata = update($(this).attr('value'));
+			
+			$('#fdfsdfoobarlorem12312dsfdf12').html(resdata.join(''));
+			
+		});
+	});
+	//$('#fdfsdfoobarlorem12312dsfdf12').html(bigone.join(''));
+/*
+    $.getJSON('cee-kopa.json', function (data) {
+		var dfsdf = main(data);
+		$('#fdfsdfoobarlorem12312dsfdf12').html(dfsdf);
+	});
+*/
+
+console.log('sdfsdfsf');
+
+});
+</script>
+</body>
+</html>

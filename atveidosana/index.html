@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<title>Atveidošanas čekings</title>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<span id="ToC"></span>
+		<span id="placeholder"></span>
+		<script>
+			function make_ToC(data1) {
+				var toc = [];
+
+				for (b = 0; b < data1.length; b++) {
+					toc.push('<a href="#' + data1[b][0] + '">' + data1[b][0] + "</a> ·");
+				}
+
+				$("#ToC").html(
+					"<div>" + toc.join("\n") + "</div><div clear=both></div><br><br><br><br>"
+				);
+			}
+
+			function main(data) {
+				var cur_counts = {};
+				var aaa = [];
+
+				//
+				aaa.push();
+				aaa.push(
+					'<div style="-moz-column-count:2; -webkit-column-count:2; column-count:2;">'
+				);
+				for (i = 0; i < data.length; i++) {
+					var orig_name = data[i][0];
+					var variants = data[i][1];
+
+					aaa.push('<a id="' + orig_name + '"></a><h3>' + orig_name + "</h3><ul>");
+
+					for (y = 0; y < variants.length; y++) {
+						var this_var_name = variants[y][0];
+						var this_var_data = variants[y][1];
+						var thisout = [];
+
+						for (z = 0; z < this_var_data.length; z++) {
+							thisout.push(
+								create_wp_link("lv", this_var_data[z][0]) +
+									" <small>(" +
+									create_wp_link("en", this_var_data[z][1]) +
+									")</small>"
+							);
+						}
+
+						aaa.push(
+							"<li><b>" + this_var_name + "</b>: " + thisout.join(", ") + "</li>"
+						);
+					}
+					aaa.push("</ul>");
+				}
+
+				return aaa.join("");
+			}
+
+			function replaceAll(str, find, replace) {
+				return str.replace(new RegExp(find, "g"), replace);
+			}
+
+			function create_wp_link(lang, href) {
+				return (
+					'<a href="https://' +
+					lang +
+					".wikipedia.org/wiki/" +
+					href +
+					'">' +
+					replaceAll(href, "_", " ") +
+					"</a>"
+				);
+			}
+
+			$(document).ready(function() {
+				$.ajax({
+					url: "api.php",
+					type: "GET",
+					dataType: "json",
+					success: function(data) {
+						$("#ToC").html(make_ToC(data));
+						var htmltext = main(data);
+						$("#placeholder").html(htmltext);
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

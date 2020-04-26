@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nākotne pagātnē</title>
+<meta charset="utf-8" />
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="common.js"></script>
+<style>
+	.title {
+		font-weight:bold;
+		font-size:larger;
+		color: #2966b8;
+		    font-size: 16pt;
+	}
+
+	.fragments {
+		font-size: 11pt;
+		//font-size:83%;
+	}
+
+	.vajadzigais {
+		
+		font-size:110%;
+		font-weight:bold;
+		background-color:#fdd;
+		padding:2px;
+		margin:1px;
+	}
+	
+	.checked {
+		
+		opacity:0.5;
+	}
+	
+	.section {
+    <!--
+	display: block;
+    border-top: 1px dotted #111111;
+    margin-bottom: 5px;
+    margin-top: 5px;
+	-->
+	background-color: #eeeee7;
+    border: 3px solid #777772;
+    border-radius: 10px;
+    box-shadow: 10px 10px 5px #888;
+    //color: #ccc;
+    margin-bottom: 20px;
+    min-height: 20px;
+    padding: 5px;
+}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand">Nākotne pagātnē</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a><span id="number-articles"></span></a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<form class="form-inline">
+  <div class="form-group mb-1">
+    <label for="input-offset"><i>Offset</i> vērtība</label>
+    <input type="text" class="form-control" id="input-offset">
+  </div>
+  <button type="button" class="btn btn-primary btn-offset">Aiziet!</button>
+</form>
+<div id="list"></div>
+<button type="button" class="btn btn-primary btn-next">Rādīt nākamos!</button>
+</div>
+<script>
+//http://jsfiddle.net/headwinds/zz3cH/
+function save_action(sectionelement,id,action) {
+	$.ajax({
+			type: "post",
+			url: "api.php",
+			dataType:"json",
+			data: {'action':'save','id':id,'result':action},
+		})
+		.done(function (response) {
+			if (response['status']=="good") {
+				sectionelement.addClass('checked');
+			} else {
+				alert('Netika saglabāts');
+			}
+	}).fail(function (jqXHR, textStatus) {
+		console.log(textStatus);
+	});
+}
+
+function show_data(lastid,offset) {
+	$.ajax({
+			type: "get",
+			url: "api.php",
+			dataType:"json",
+			data: {'action':'main','offset':offset,'last_id':lastid,'type1':'next'},
+		})
+		.done(function (response) {
+			$('#number-articles').html('Palikuši '+response['articles']+' raksti');
+			var finalmas1 = [];
+			var resplist = response['list'];
+
+			for (var i = 0; i < resplist.length; i++) {
+				var thisitem = resplist[i];
+				finalmas1.push(one_item(thisitem.id,thisitem.title,thisitem.before_str.escape(),thisitem.match_str,thisitem.after_str.escape()));
+			}
+			
+		$('#list').html(finalmas1.join('\n'));
+		
+	}).fail(function (jqXHR, textStatus) {
+		console.log(textStatus);
+	});
+}
+
+$(document).ready(function() {
+    $("#input-offset").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+             // Allow: Ctrl/cmd+A
+            (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: Ctrl/cmd+C
+            (e.keyCode == 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: Ctrl/cmd+X
+            (e.keyCode == 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: home, end, left, right
+            (e.keyCode >= 35 && e.keyCode <= 39)) {
+                 // let it happen, don't do anything
+                 return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+});
+
+$(document).on('click', '.btn-next', function(){
+	var last_id = $( ".section" ).last().data('id');
+	show_data(last_id,0);
+	$('html, body').animate({ scrollTop: 0 }, 'fast');
+});
+
+$(document).on('click', '.btn-offset', function(){
+	//var last_id = $( ".section" ).last().data('id');
+	var offset_val = $( "#input-offset" ).val();
+	show_data(0,offset_val);
+	//$('html, body').animate({ scrollTop: 0 }, 'fast');
+});
+
+$(document).on('click', '.btn-ok', function(){
+	//save_action(2);
+	var thissection = $(this).closest('.section');
+	var thisid = thissection.data('id');
+	//thissection.addClass('checked');
+	//console.log(thisid);
+	save_action(thissection,thisid,'ok');
+});
+
+$(document).on('click', '.btn-dunno', function(){
+	var thissection = $(this).closest('.section');
+	var thisid = thissection.data('id');
+	thissection.addClass('checked');
+});
+
+$(document).on('click', '.btn-noterror', function(){
+	//save_action(2);
+	var thissection = $(this).closest('.section');
+	var thisid = thissection.data('id');
+	//thissection.addClass('checked');
+	//console.log(thisid);
+	save_action(thissection,thisid,'no');
+});
+
+$(document).on('click', '.btn-will', function(){
+	//save_action(2);
+	var thissection = $(this).closest('.section');
+	var thisid = thissection.data('id');
+	//thissection.addClass('checked');
+	//console.log(thisid);
+	save_action(thissection,thisid,'will');
+});
+
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+//https://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
+String.prototype.escape = function() {
+    var tagsToReplace = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;'
+    };
+    return this.replace(/[&<>]/g, function(tag) {
+        return tagsToReplace[tag] || tag;
+    });
+};
+
+function create_lv_link(href,label) {
+	href = encodeURI(href);
+	return '<a target="_blank" href="https://lv.wikipedia.org/wiki/'+replaceAll(href, ' ', '_')+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+function create_edit_link(href) {
+	href = encodeURI(href);
+	return '<a target="_blank" href="https://lv.wikipedia.org/w/index.php?title='+replaceAll(href, ' ', '_')+'&action=edit">labot</a>'
+}
+
+show_data(0,0);
+
+function one_item(id,title,before,match,after) {
+	return `<div class="section" data-id="`+id+`"><span class="title">`+create_lv_link(title,title)+` <small>(`+create_edit_link(title)+`)</small></span>
+<br>
+<span class="fragments">`+before+`<span class="vajadzigais">`+match+`</span>`+after+`</span>
+<br>
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-success btn-ok">Izlabots!</button>
+    <button type="button" class="btn btn-warning btn-noterror">Nav jālabo</button>
+    <button type="button" class="btn btn-danger btn-will">Fakts novecos</button>
+</div>
+</div>`
+}
+//<button type="button" class="btn btn-secondary btn-dunno">Neesmu pārliecināts</button>
+</script>
+</body>
+</html>

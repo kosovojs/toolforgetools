@@ -1,0 +1,37 @@
+<% include ./src/partials/head.ejs %>
+<body>
+	<%
+		const active = 'second';
+		const userList = ['Baisulis','Biafra','Edgars2007','Feens','Jānis U.','Ludis21345','Meistars Joda','Papuass','Pirags','ScAvenger','Treisijs','Turaids','Vylks'];
+		const userCount = 3;
+	%>
+	<div>
+		<%- include ./src/partials/nav.ejs%>
+	</div>
+	<div class="bodyContainer">
+		<h3>2019. gada vērtīgākais dalībnieks Vikipēdijā latviešu valodā</h3>
+		Balsošana notiek līdz 2020. gada 16. janvārim plkst. 12.00 (pēc Latvijas laika)<br /><div style="margin-top:10px; margin-bottom: 20px;">Šis ir balsojums par 2019. gada vērtīgāko dalībnieku(-ci) Vikipēdijā latviešu valodā.<br />Kandidāti ir uzskaitīti alfabētiskā secībā. Tāpat kā iepriekšējos gados, otrajā kārtā tiek virzīti 10 dalībnieki, kas visvairāk balsis saņēma pirmajā kārtā, bet 10. vieta tiek dalīta starp vairākiem cilvēkiem, tāpēc šoreiz finālisti ir 13, nevis 10. Tāpat kā iepriekšējos gados, balsojam maksimāli par trim dalībniekiem. Var balsot arī par diviem vai tikai par vienu.</div>
+		<ul class="twoRows">
+			<% userList.forEach(function(user){ %>
+			<li>
+				<input
+					type="checkbox"
+					class="votingCheckbox"
+					id="<%= 'check'+user %>"
+					name="votingCheckbox"
+					data-user="<%= user %>"
+				/>
+				<label for="<%= 'check'+user %>"><%= user %> </label> (<a
+					href="<%= 'https://lv.wikipedia.org/wiki/Dalībnieks:'+user.replace(/ /g,'_') %>"
+					rel="noopener"
+					target="_blank"
+					>dalībnieklapa</a
+				>)
+			</li>
+			<% }) %>
+		</ul>
+
+		<div id="currentUserCount"></div>
+		<button type="button" class="btn btn-primary" id="voteButton">Balsot!</button>
+	</div>
+</body>

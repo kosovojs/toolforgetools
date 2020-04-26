@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<link href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script src="common.js"></script>
+<title>Jauns ieraksts</title>
+<style>
+.asterix-req {color:red; font-size:130%;}
+</style>
+<script>
+moment.updateLocale('en', {
+  week: { dow: 1 } // Monday is the first day of the week
+});
+</script>
+<meta charset="utf-8" />
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">100wikidays</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="new.html">Jauns ieraksts</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<span id="only_logged"></span>
+<span id="add_status"></span>
+<br>
+<div class="container">
+<form>
+  <div class="row">
+  <div class="col-md-8">
+  <div class="form-group">
+    <label>Lapa</label>
+    <input class="form-control removal" id="inputArticle" placeholder="Sākumlapa">
+  </div>
+  </div>
+  <div class="col-md-4">
+  <div class="form-group">
+    <label>Diena</label>
+    <input class="form-control typeahead removal" id="inputDay" placeholder="90">
+  </div>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-md-3">
+  <div class="form-group">
+    <label>Datums</label>
+                <div class='input-group date' id='datetimepicker1'>
+                    <input type='text' class="form-control removal" id="inputDate" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker({sideBySide:true,format : 'YYYY-MM-DD'});
+            });
+        </script>
+  </div>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-md-12">
+  <div class="form-group">
+    <label>Komentārs</label>
+    <textarea class="form-control rounded-0" id="inputComment" rows="5" placeholder="Piezīmes pašam sev"></textarea>
+  </div>
+  </div>
+  </div>
+</form>
+<span id="complete"></span>
+<br>
+<button class="btn btn-default" id="submit-data">Saglabāt</button>
+</div>
+<script>
+
+$(document).on('click', '#submit-data', function(){
+	var data = {};
+	isok = true;
+	
+    $('.required').each(function() {
+        if(!$(this).val()){
+            alert('Aizpildi visus obligātos laukus!');
+           isok = false;
+		   return false;
+        }
+    });
+	
+	if (isok) {
+		data.article = $('#inputArticle').val();
+		data.day = $('#inputDay').val();
+		data.date = $('#inputDate').val();
+		data.comment = $('#inputComment').val();
+		console.log(data);
+		
+     $.ajax({
+        type: "post",
+        url: "api.php",
+        dataType:"json",
+        data: {'data':data,'action':'new_article_to_wikidays'},
+    })
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+			if(response.status === "success") {
+                console.log('yes');
+				$('#only_logged').html( '<div class="alert alert-success" role="alert">Paziņojums tika veiksmīgi pievienots!</div>' );
+				
+            } else if(response.status === "error") {
+                console.log('no');
+				$('#only_logged').html( '<div class="alert alert-warning" role="alert">Paziņojums netika pievienots. Sazinies ar autoru!</div>' );
+            }
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+		});
+		
+	}
+	
+});
+
+window.onload = function() {
+  $('.removal').val('');
+  $('textarea').val('');
+  $('select[name=selectOutput]').val('');
+}
+</script>
+</body>
+</html>

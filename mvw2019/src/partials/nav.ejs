@@ -1,0 +1,23 @@
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			<a class="navbar-brand">MVW 2019</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			  <span class="navbar-toggler-icon"></span>
+			</button>
+		  
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			  <ul class="navbar-nav mr-auto">
+				<li <% if (active == 'first'){ %> class="nav-item active"<% } else { %> class="nav-item"<% } %>>
+					<a class="nav-link" href="index.html">Vērtīgākais vikipēdists — 1. kārta</a>
+				</li>
+				<li <% if (active == 'second'){ %> class="nav-item active"<% } else { %> class="nav-item"<% } %>>
+					<a class="nav-link" href="second.html">Vērtīgākais vikipēdists — 2. kārta</a>
+				</li>
+				<li <% if (active == 'newbie'){ %> class="nav-item active"<% } else { %> class="nav-item"<% } %>>
+					<a class="nav-link" href="newbie.html">Labākais jauniņais</a>
+				</li>
+			  </ul>
+			  
+				<span id="username" class="navbar-text"></span>
+				<span id="login" class="navbar-text"></span>
+			</div>
+		  </nav>

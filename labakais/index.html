@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>2018. gada vērtīgākais vikipēdists</title>
+<meta charset="utf-8" />
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="common.js"></script>
+</head>
+<body>
+<div class="container">
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="">2018. gada vērtīgākais dalībnieks</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="new.html">Labākais jaunais dalībnieks</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<h2>2018. gada vērtīgākais dalībnieks Vikipēdijā latviešu valodā</h2>
+<div id="message"></div>
+Balsošana notiek līdz 2019. gada 20. janvārim plkst. 13.00 (pēc Latvijas laika)<br><br>
+Izvēlies maksimums 3 dalībniekus, par kuriem balsot:
+<div id="user-list"></div>
+<button class="btn btn-default" id="save">Saglabāt</button>
+</div>
+<script>
+const users = ['Biafra', 'Edgars2007', 'Feens', 'Ingii', 'Kleivas', 'Lieeeneee', 'Ludis21345', 'MC2013', 'Papuass', 'Pirags', 'ScAvenger', 'Treisijs', 'Turaids', 'Vylks', 'Zuiks'];
+
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_lv_link(href,label) {
+	return '<a target="_blank" href="https://lv.wikipedia.org/wiki/'+replaceAll(href, ' ', '_')+'">'+replaceAll(label, '_', ' ')+'</a>';
+}
+
+function oneUser(name,id) {
+	const one_user = `<input type="checkbox" class="check" data-id="${id}"> ${name}</input>`;
+	
+	return one_user;
+}
+
+let userList = [];
+
+for (let i = 0; i < users.length; i++) {
+	userList.push(oneUser(users[i],i));
+}
+
+$('#user-list').html(userList.join('<br>'));
+
+function saveDB() {
+	let userIds = [];
+	
+	$('.check').each(function () {
+		if (!this.checked) { return; }
+       var sThisVal = (this.checked ? $(this).data('id') : "");
+	   userIds.push(sThisVal);
+	});
+  
+	if (userIds.length<1) {
+		alert('Izvēlies vismaz vienu dalībnieku!');
+		return;
+	}
+	
+	if (userIds.length>3) {
+		alert('Pārāk daudz izvēlētu dalībnieku! Izvēlies maksimums 3 dalībniekus');
+		return;
+	}
+	
+     $.ajax({
+        type: "post",
+        url: "api.php?tips=1&data="+JSON.stringify(userIds),
+        dataType:"json",
+		//action: 'new',
+    })
+	.done(function (response) {
+			if(response.status === "success") {
+                $('#message').html(`<div class="alert alert-success" role="alert">${response.msg}</div>`);
+            } else if(response.status === "error" && response.msg === "Tu neesi ielogojies!") {
+                $('#message').html(`<div class="alert alert-danger" role="alert">Lai nobalsotu, Tev ir <a class="alert-link" href="//tools.wmflabs.org/edgars/index.php?action=authorize">jāielogojas</a></div>`);
+            } else if(response.status === "error") {
+                $('#message').html(`<div class="alert alert-danger" role="alert">${response.msg}</div>`);
+			}
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+        $('#message').html(`<div class="alert alert-danger" role="alert">Kaut kas galīgi greizi nogājis! Oriģinālo kļūdas paziņojumu skatīt konsolē.</div>`);
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest['responseText']);
+	});
+}
+
+$(document).on('click', '#save', function(){
+	saveDB();
+
+});
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/selectize.js/0.12.4/js/standalone/selectize.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/selectize.js/0.12.4/css/selectize.min.css">
+
+<script src="common.js"></script>
+<script src="cee-kopa_infs.js"></script>
+<title>Pēc infokastes</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<table width=100%>
+<tr>
+<td style="text-align:center;" width=33%><a href="kopejais.html">Kopējais</a></td>
+<td style="text-align:center;" width=33%><a href="valsts.html">Pēc valsts</a></td>
+<td style="text-align:center;" width=33%><a href="infokaste.html">Pēc infokastes</a></td>
+</tr>
+</table>
+<hr />
+<span id="last_upd"></span>
+<br>
+<span id="dumpres"></span>
+<span id="select1"></span>
+<span id="ToC"></span>
+<span id="fdfsdfoobarlorem12312dsfdf12"></span>
+<script>
+function parse_countries(countries) {
+	var countrylist = [];
+	
+	for (i = 0; i < countries.length; i++) {
+		if (countries[i] in projects) {
+			var thisentry = projects[countries[i]][0];
+			countrylist.push(thisentry);
+		} else {
+			countrylist.push(countries[i]);
+		}
+	}
+	
+	return countrylist
+}
+
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+Array.prototype.unique = function() {
+  return this.filter(function (value, index, self) { 
+    return self.indexOf(value) === index;
+  });
+}
+
+function compare(a, b){
+  let comparison = 0;
+
+  if (a > b) {
+    comparison = 1;
+  } else if (b > a) {
+    comparison = -1;
+  }
+
+  return comparison;
+}
+
+function compare1(a, b){
+  let comparison = 0;
+  a = parseInt(a[1]);
+  b = parseInt(b[1]);
+
+  if (a > b) {
+    comparison = -1;
+  } else if (b > a) {
+    comparison = 1;
+  }
+
+  return comparison;
+}
+
+function make_ToC(data) {
+	var toc = [];
+	
+	toc.push('<div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;"><ul>');
+	
+	for (i = 0; i < data.length; i++) {
+		toc.push('<li><a href="#'+data[i]+'">'+data[i]+'</a></li>');
+	}
+	toc.push('</ul></div>');
+	
+	$('#ToC').html(toc.join('\n'));
+}
+
+function push_to_arr(arr,key,val) {
+	if (key in arr) {
+		arr[key].push(val);
+	} else {
+		arr[key] = [val];
+	}
+	
+	return arr
+}
+
+function get_unique_key_values(data1) {
+	var keys = [];
+
+	for (i = 0; i < data1.length; i++) {
+		var infs = data1[i][2];
+		
+		for (z = 0; z < infs.length; z++) {
+			if (!(infs[z] in keys)) {
+				keys.push(infs[z]);
+			}
+		}
+	}
+	
+	keys = keys.unique().sort(compare);//a.toLowerCase()-b.toLowerCase()});//fix sorting
+	
+	//console.log(keys);
+	
+	return keys
+}
+
+
+function sort_by_key(data1) {
+	keys = Object.keys(data1);
+	//get_unique_key_values(data1);
+	var arr1 = {};
+	
+	for (i = 0; i < data1.length; i++) {
+		var infs = data1[i][2];
+		
+		for (z = 0; z < infs.length; z++) {
+			push_to_arr(arr1,infs[z],[data1[i][0],data1[i][1]]);
+			
+			//arr1[infs[z]].push([data1[i][0],data1[i][1]]);
+		}
+	}
+	console.log(arr1);
+	
+	return arr1
+}
+
+function create_select(select_data) {
+	var aaa = [];
+	select_data = select_data.sort(compare);
+	aaa.push('<select id="myselect">');
+	for (i = 0; i < select_data.length; i++) {
+		if (select_data[i]=='') {
+			aaa.push('<option value="'+select_data[i]+'">Nav infokastes</option>');
+		} else {
+		
+			aaa.push('<option value="'+select_data[i]+'">'+replaceAll(select_data[i],'Infobox_?','')+'</option>');
+		}
+	}
+	aaa.push('</select>');
+	
+	return aaa.join('');
+}
+var bad_infs = ['Infobox_Subdivision_administrative','Infobox_Personnalité_politique','Infobox_Footballeur','Infobox_Joueur_de_tennis'];
+
+function main(which_infobox) {
+	var cur_counts = {};
+	var aaa = [];
+	//console.log(data1);
+	
+	var check_max_entries = true;
+	var group_by_infs = true;
+	
+	var data_for_table = data[which_infobox];
+	if (data_for_table.length>20)
+		aaa.push('<div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;">');
+	aaa.push('<ul>');
+		
+	data_for_table = data_for_table.sort(compare1);
+		
+	for (y = 0; y < data_for_table.length; y++) {
+		if (y==2500) {break;}
+		aaa.push('<li>'+create_wp_link('en',data_for_table[y]['en'],data_for_table[y]['en'])+' <small>('+parse_countries(data_for_table[y]['projs']).join(", ")+')</small> - '+data_for_table[y]['iw']+'</li>');
+	}
+	aaa.push('</ul>');
+	if (data_for_table.length>20)
+		aaa.push('</div>');
+	
+	return aaa.join('')+'';
+}
+
+function create_wp_link(lang,href,label) {
+	return '<a href="https://'+lang+'.wikipedia.org/wiki/'+href+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+//console.log(bigone);
+
+$(document).ready(function () {
+	$('#last_upd').html('Dati pēdējoreiz atjaunināti: '+last_update);
+	$('#select1').html(create_select(Object.keys(data)));
+	
+	$('#myselect').selectize({
+					persist: false,
+					createOnBlur: true,
+					create: false
+	});
+	
+	$('#select1').on('change', function() {
+		//console.log( this.value );
+		$( "#select1 option:selected" ).each(function() {
+			console.log($(this).attr('value'));
+			$('#fdfsdfoobarlorem12312dsfdf12').html('');
+			var resdata = main($(this).attr('value'));
+			
+			$('#fdfsdfoobarlorem12312dsfdf12').html(resdata);
+			
+		});
+	});
+});
+
+</script>
+</body>
+</html>

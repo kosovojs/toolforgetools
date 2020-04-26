@@ -1,0 +1,34 @@
+.threeRows {
+	column-count: 3;
+}
+
+.twoRows {
+	column-count: 2;
+}
+
+.bodyContainer {
+	margin: 3vh 5vw;
+}
+
+.warning {
+	color: rgba(255, 60, 0, 0.767);
+	font-weight: bold;
+}
+
+#username {
+	padding-right: 25px;
+}
+
+.toastify {
+	color: black !important;
+}
+
+@media screen and (max-width: 750px) {
+	.threeRows {
+		column-count: 1;
+	}
+
+	.twoRows {
+		column-count: 1;
+	}
+}
