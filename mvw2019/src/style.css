@@ -2,10 +2,6 @@
 	column-count: 3;
 }
 
-.twoRows {
-	column-count: 2;
-}
-
 .bodyContainer {
 	margin: 3vh 5vw;
 }
@@ -21,14 +17,4 @@
 
 .toastify {
 	color: black !important;
-}
-
-@media screen and (max-width: 750px) {
-	.threeRows {
-		column-count: 1;
-	}
-
-	.twoRows {
-		column-count: 1;
-	}
 }
