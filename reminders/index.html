@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script type="text/javascript" charset="utf8" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/css/jquery.dataTables.min.css">
+<script src="common.js"></script>
+<title>Reminders</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Reminders</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="new.html">Jauns ieraksts</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<br>
+<div class="alert alert-warning" role="alert">Piezīme: ar arhivēšanas pogu esi uzmanīgs! Tad paziņojums vairs nebūs aktīvs, šo darbību Tu atcelt nevarēsi. Taču datubāzē tas tiks saglabāts, tāpēc kļūdas gadījumā sazinies ar <a href="https://lv.wikipedia.org/wiki/Dal%C4%ABbnieka_diskusija:Edgars2007">autoru</a></div>
+<table class="table table-striped" id="exampleTable">
+    <thead> 
+        <tr>
+            <th>Lapa</th>
+            <th>Pievienots</th>
+            <th>Paziņošanas laiks</th>
+            <th>Paziņojuma ievietošanas laiks</th>
+            <th>Paziņojuma saņēmējs</th>
+            <th>Komentārs</th>
+            <th>Darbības</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+</div>
+<script>
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_lv_link(href,label) {
+	return '<a target="_blank" href="https://lv.wikipedia.org/wiki/'+replaceAll(href, ' ', '_')+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+var table;
+
+function add_tables(finalmas) {
+	var iTableCounter = 1;
+		//var oTable;
+		var detailsTableHtml;
+
+		//Run On HTML Build
+		$(document).ready(function () {
+			detailsTableHtml = $("#detailsTable").html();
+			//var oTable = $('#exampleTable').DataTable(); 
+
+			//Initialse DataTables, with no sorting on the 'details' column
+			table = $('#exampleTable').DataTable({
+				//"bJQueryUI": true,
+				"aaData": finalmas,
+				 "columnDefs": [
+            {
+                "render": function ( data ) {
+                    return create_lv_link(data,data);
+					
+                },
+                "targets": 0
+            },
+            {
+                "render": function ( data ) {
+                    return create_lv_link('Dalībnieks:'+data,data);
+					
+                },
+                "targets": 4
+            },
+			{
+            "targets": 6,
+            "data": null,
+            "defaultContent": '<button class="btn btn-default">Arhivēt!</button>'
+        },
+		{
+        targets: 5,
+        render: function ( data ) {
+            if (data.length>40) {
+				return '<span title="'+data+'">'+data.substr( 0, 40 )+'...</span>';
+			} else {
+				return data;
+			}
+		}
+    }
+				],
+				"bPaginate": true,
+				"aoColumns": [
+					//id, page, notif_time, completed, ping_user
+					//user:name, points:thisdata["meta"][0], articles
+					{ "mDataProp": "page" },
+					{ "mDataProp": "add_date" },
+					{ "mDataProp": "notif_time" },
+					{ "mDataProp": "completed" },
+					{ "mDataProp": "ping_user" },
+					{ "mDataProp": "comment" },
+					{ "mDataProp": null }
+				],
+				"aaSorting": [[2, 'asc']]
+			});
+			
+			
+	$('#exampleTable tbody').on( 'click', 'button', function () {
+        var data = table.row( $(this).parents('tr') ).data();
+		archive(data.id);
+    } );
+	
+		});
+		
+}
+
+function regenerate(new_d) {
+
+$.ajax({
+        type: "get",
+        url: "api.php",
+        dataType:"json",
+        data: {'action':'main_reminders'},
+    })
+	.done(function (response) {
+		if (new_d) {
+			add_tables(response);
+		} else {
+		   table.clear().draw();
+		   table.rows.add(response); // Add new data
+		   table.columns.adjust().draw(); // Redraw the DataTable
+		}
+		
+})
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest['responseText']);
+		});
+}
+
+function archive(id) {
+	//add_tables(response);
+	$.ajax({
+        type: "post",
+        url: "api.php",
+        dataType:"json",
+        data: {'action':'archive_reminder','data':id},
+    })
+	.done(function (response) {
+		console.log(response);
+		if (response['status']=='good') {
+			regenerate(false);
+		} else {
+			alert('Neizdevās. Arhivēt vari tikai savus paziņojumus vai tos, kam esi paziņojuma saņēmējs');
+		}
+})
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest['responseText']);
+		});
+		
+
+
+}
+
+regenerate(true);
+</script>
+</body>
+</html>

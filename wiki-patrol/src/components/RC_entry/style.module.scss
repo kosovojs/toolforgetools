@@ -1,0 +1,58 @@
+.container {
+	border-radius: 5px;
+	border: solid 1px gray;
+	padding: 10px 5px;
+	margin-bottom: 10px;
+	font-size: 12px;
+}
+
+.badFaith {
+	background-color: rgba(245, 149, 149, 0.863);
+}
+
+.articleTitle {
+	font-weight: bold;
+	padding-right: 25px;
+	font-size: 1rem;
+}
+
+.oneEdit {
+	display: flex;
+	flex-direction: row;
+}
+
+.header {
+	display: flex;
+	flex-direction: row;
+}
+
+.revTitle {
+	font-size: 0.9rem;
+	padding-right: 25px;
+}
+
+.revUser {
+	font-size: 0.9rem;
+	padding-right: 25px;
+}
+
+.revOres {
+	font-size: 0.9rem;
+	padding-right: 25px;
+}
+
+.revTime {
+	font-size: 0.9rem;
+	padding-right: 25px;
+}
+
+.editContainer {
+	max-height: 300px;
+	overflow: auto;
+}
+
+.summary {
+	font-size: 0.9rem;
+	max-width: 30%;
+	padding-right: 25px;
+}

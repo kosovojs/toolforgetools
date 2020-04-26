@@ -1,0 +1,12 @@
+{
+  "extends": "stylelint-config-standard",
+  
+  "ignoreFiles": [
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "rules": {
+	"at-rule-empty-line-before": null,
+	"indentation": "tab"
+  }
+}

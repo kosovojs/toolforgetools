@@ -1,0 +1,57 @@
+{
+	"env": {
+		//"commonjs": true,
+		"es6": true,
+		"node": true,
+		"browser": true
+	},
+	"extends": [
+		//"eslint:recommended",
+		//"plugin:react/all",
+		"plugin:import/errors",
+		"plugin:import/warnings",
+		"plugin:react/recommended"
+		//"plugin:prettier/recommended"
+	],
+	"parserOptions": {
+		"ecmaVersion": 2018,
+		"sourceType": "module"
+	},
+	"rules": {
+		//https://eslint.org/docs/rules/
+		"no-console": 0,//later make this an warning
+		"react/prop-types": 2,//later make this an warning
+		"react/no-typos": 2,
+		"react/jsx-filename-extension": 0,
+		"react/jsx-indent": [0, "tab", {"checkAttributes": true, "indentLogicalExpressions": true}],
+		"react/jsx-one-expression-per-line": 0,
+		"react/jsx-no-literals": 0,
+		"react/require-optimization": 0,
+		"react/jsx-closing-tag-location": 0,
+		"react/jsx-max-depth": [0, { "max": 3 }],
+		"react/jsx-wrap-multilines": 0,
+		"react/display-name": 0,
+		"react/jsx-indent-props": 0,
+		"react/jsx-sort-props": 0,
+		"react/jsx-curly-brace-presence": 1,
+		"react/no-set-state": 0,
+		"react/sort-comp": 0,
+		"react/forbid-component-props": 0,
+		"react/jsx-no-duplicate-props": 2,
+		"import/no-unresolved": 0
+	},
+	"plugins": [
+		"react"
+	],
+	"parser": "babel-eslint",
+	"settings": {
+		"react": {
+			"pragma": "React",
+			"version": "detect",
+			"linkComponents": [
+				// Components used as alternatives to <a> for linking, eg. <Link to={ url } />
+				{"name": "Link", "linkAttribute": "to"}
+			]
+		}
+	}
+}
