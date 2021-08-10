@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Category checker</title>
+		<link
+			href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+    <style>
+      .req {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-3">
+					<label for="wikiInput" class="form-label">Source wiki <span class="req">*</span></label>
+					<input
+						type="text"
+						class="form-control"
+						id="wikiInput"
+						aria-describedby="sourceWikiHelp"
+					/>
+					<div id="sourceWikiHelp" class="form-text">
+						Input wiki title (in form "XXwiki")
+					</div>
+				</div>
+				<div class="col-sm-5">
+					<label for="sourceCategory" class="form-label">Source category <span class="req">*</span></label>
+					<input type="text" class="form-control" id="sourceCategory" />
+				</div>
+				<div class="col-sm-4">
+					<label for="sourceCategoryDepth" class="form-label"
+						>Source category depth</label
+					>
+					<input type="text" class="form-control" id="sourceCategoryDepth" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-3">
+					<label for="wikiTargetInput" class="form-label">Target wiki <span class="req">*</span></label>
+					<input
+						type="text"
+						class="form-control"
+						id="wikiTargetInput"
+						aria-describedby="sourceWikiHelp"
+					/>
+					<div id="sourceWikiHelp" class="form-text">
+						Target wiki title (in form "XXwiki")
+					</div>
+				</div>
+				<div class="col-sm-5">
+					<label for="targtnegativeCategory" class="form-label"
+						>Target wiki negative category</label
+					>
+					<input type="text" class="form-control" id="targtnegativeCategory" />
+					<div id="targtnegativeCategoryHelp" class="form-text">
+						Articles in this category will be ignored
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<label for="trgCategoryDepth" class="form-label"
+						>Target wiki negative category depth</label
+					>
+					<input type="text" class="form-control" id="trgCategoryDepth" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-5">
+					<label for="catForInput" class="form-label">Category to add <span class="req">*</span></label>
+					<input type="text" class="form-control" id="catForInput" />
+				</div>
+			</div>
+			<button type="button" id="sbmButton" class="btn btn-primary">Submit</button>
+			<button type="button" id="exampleBtn" class="btn btn-primary">Set example</button>
+
+			<div id="results">
+				<div id="result_msg"></div>
+
+				<textarea id="result_qs" class="mb-3 form-control" rows="15" cols="20"></textarea>
+
+				<div id="result_listing"></div>
+			</div>
+		</div>
+
+		<script
+			src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.min.js"
+		></script>
+		<script>
+			const getInputVal = (el) => {
+				return document.getElementById(el).value;
+			};
+
+			const setInputVal = (el, val) => {
+				return (document.getElementById(el).value = val);
+			};
+
+			const buildQuery = (data) => {
+				return new URLSearchParams(data).toString();
+			};
+
+			const handleResponse = (resp) => {
+				document.getElementById('result_qs').value = '';
+				document.getElementById('result_msg').innerHTML = '';
+				if (!resp || resp.length < 1) {
+					document.getElementById('result_msg').innerHTML = 'No results';
+					document.getElementById('result_qs').value = '';
+					return;
+				}
+
+				let valForBox = [];
+				let valForList = [];
+
+				const srcCat = getInputVal('catForInput');
+
+				resp.forEach((item) => {
+					valForBox.push(`${item}|+Category:${srcCat}`);
+				});
+
+				document.getElementById('result_qs').value = valForBox.join('\n');
+			};
+			document.getElementById('sbmButton').addEventListener('click', () => {
+				const data = {
+					source_wiki: getInputVal('wikiInput'),
+					source_cat: getInputVal('sourceCategory'),
+					source_cat_depth: getInputVal('sourceCategoryDepth'),
+					target_wiki: getInputVal('wikiTargetInput'),
+					target_wiki_cat: getInputVal('targtnegativeCategory'),
+					target_wiki_cat_depth: getInputVal('trgCategoryDepth'),
+				};
+
+				console.log(data, buildQuery(data));
+
+				fetch(`https://edgars.toolforge.org/cat_check/api.php?${buildQuery(data)}`)
+					.then((resp) => resp.json())
+					.then((res) => {
+						console.log(res);
+
+						handleResponse(res);
+					});
+			});
+
+			document.getElementById('exampleBtn').addEventListener('click', () => {
+				setInputVal('wikiInput', 'ruwiki');
+				setInputVal('sourceCategory', 'Родившиеся в Северном Рейне-Вестфалии');
+				setInputVal('catForInput', 'Ziemeļreinā-Vestfālenē dzimušie');
+				setInputVal('sourceCategoryDepth', '1');
+				setInputVal('wikiTargetInput', 'lvwiki');
+				setInputVal('targtnegativeCategory', 'Vācijā dzimušie');
+				setInputVal('trgCategoryDepth', '2');
+			});
+		</script>
+	</body>
+</html>

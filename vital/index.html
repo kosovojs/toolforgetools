@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nozīmīgie raksti</title>
+<meta charset="utf-8" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<script src="common.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://localhost/vital/">Vital</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="group.html">Pēc grupas</a></li>
+        <li><a href="views.html">Pēc skatījumiem</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<h3>Kopsavilkums</h3>
+<div id="kopsavilkums"></div>
+<br>
+<h3>4. līmeņa raksti</h3>
+<div id="level4"></div>
+<script>
+function sum_table(dataForTable) {
+	var aaa = [];
+	header = ['Sadaļa','Līmenis','Skaits'];
+	aaa.push('<table class="table table-striped table-bordered table-condensed" id="datatable1"><thead><tr>');//         
+	for (i = 0; i < header.length; i++) {
+		aaa.push('<th>'+header[i]+'</th>');
+	}
+	
+	aaa.push('</tr></thead>');
+	
+	/*
+	aaa.push('<tfoot><tr>');
+	for (i = 0; i < header.length; i++) {
+		aaa.push('<th>'+header[i]+'</th>');
+	}
+	aaa.push('</tr></tfoot><tbody id="myTable">');
+	*/
+	aaa.push('<tbody id="myTable">');
+	for (y = 0; y < dataForTable.length; y++) {
+	//for (var key in data) {
+		var thisdata = dataForTable[y];
+		
+		aaa.push('<td>'+thisdata['name']+'</td>');
+		aaa.push('<td>'+thisdata['limenis']+'</td>');
+		aaa.push('<td>'+thisdata['count']+'</td>');
+		
+		//aaa.push('<td>'+thisdata.join('</td><td>')+'</td>');
+		aaa.push('</tr>');
+	}
+	
+	return res = aaa.join("\n") + '</tbody></table>';
+}
+
+function create_table_l4(header,head_len,data) {
+	var aaa = [];
+	aaa.push('<table class="table table-striped table-bordered table-condensed"><thead><tr>');//         
+	for (i = 0; i < header.length; i++) {
+		aaa.push('<th style="width:'+head_len[i]+'">'+header[i]+'</th>');
+	}
+	
+	aaa.push('</tr></thead>');
+	
+	/*
+	aaa.push('<tfoot><tr>');
+	for (i = 0; i < header.length; i++) {
+		aaa.push('<th>'+header[i]+'</th>');
+	}
+	aaa.push('</tr></tfoot><tbody id="myTable">');
+	*/
+	aaa.push('<tbody id="myTable">');
+	for (y = 0; y < data.length; y++) {
+	//for (var key in data) {
+		var thisdata = data[y];
+		if (y==10) { break; }
+		
+		var title = thisdata[0];
+		
+		aaa.push('<td>'+create_wp_link('en',title,title)+'</td>');
+		aaa.push('<td>'+thisdata[1]+'</td>');
+		
+		//aaa.push('<td>'+thisdata.join('</td><td>')+'</td>');
+		aaa.push('</tr>');
+	}
+	
+	return res = aaa.join("\n") + '</tbody></table>';
+}
+
+function formatSection(tabledata,sectionname,numArticles) {
+	return '<div class="col-md-4"><b><big>'+sectionname+'</big></b> <small>(kopā: '+numArticles+')</small><br>'+tabledata+'</div>';
+}
+
+function v4_section(alldata) {
+	sectiondata = [];
+	
+	for (var a = 0; a < alldata.length; a++) {
+		var currData = alldata[a];
+		if (currData['limenis']!=4) {continue; }
+		
+		currTable = create_table_l4(['Raksts','iw'],['150px','40px'],currData['jsondata']);
+		
+		sectiondata.push(formatSection(currTable,currData['name'],currData['count']));
+	}
+	
+	return sectiondata.join("\n");
+}
+
+function replaceAll(str, find, replace) {
+    if (str && str != null) {
+		return str.replace(new RegExp(find, 'g'), replace);
+	} else {
+		return str;
+	}
+}
+
+function create_wp_link(lang,href,label) {
+	return '<a target="_blank" href="https://'+lang+'.wikipedia.org/wiki/'+href+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+function get_data() {
+	$.ajax({
+		type: "GET",
+		url: 'api.php',                  //the script to call to get data          
+		data: {'act':'all_data'},                        //you can insert url argumnets here to pass to api.php
+		dataType: 'json',                //data format  
+		//async: false		
+		})
+		.done(function(data1) {
+			console.log('tgrfgfrddddddddddddf');
+			console.log(data1);
+			$('#level4').html(v4_section(data1));
+			$('#kopsavilkums').html(sum_table(data1));
+			$('#datatable1').DataTable({"paging": false, "searching": false, "order": [[ 2, "desc" ]]});
+			
+		})
+		
+}
+
+//console.log(bigone);
+
+$(document).ready(function () {
+	
+	//$('#select1').html(create_select(Object.keys(data)));
+	get_data();
+});
+
+</script>
+</body>
+</html>

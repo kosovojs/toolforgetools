@@ -1,0 +1,5 @@
+{
+    "require": {
+        "websitebeaver/simple-mysqli": "^1.5"
+    }
+}

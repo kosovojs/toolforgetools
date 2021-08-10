@@ -8,7 +8,7 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
 date_default_timezone_set('Europe/Riga');
 
-require_once __DIR__.'/lib/oauth.php';
+require_once __DIR__.'/../php/oauth.php';
 
 $oauth = new MW_OAuth('edgars', 'lv', 'wikipedia');
 
@@ -30,6 +30,11 @@ function getRequest($key, $default = "")
 $reqParams = empty($_REQUEST) ? json_decode(file_get_contents('php://input'), true) : $_REQUEST;
 
 $action = getRequest('action');
+
+if ($action === 'login') {
+	$oauth->doAuthorizationRedirect();
+	exit();
+}
 
 if ($action === 'rc') {
 	get_rc();
@@ -147,6 +152,12 @@ function save_last_good() {
 	
 	echo json_encode(['status'=>'ok']);//, 'err'=> $oauth->error, 'txt'=>$pageTextForsave
 
+}
+
+function getPageText($revision) {
+	global $oauth;
+
+	return $pageText;
 }
 
 function get_rc() {

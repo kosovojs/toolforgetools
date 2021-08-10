@@ -1,0 +1,39 @@
+<% include ./src/partials/head.ejs %>
+<body>
+	<%
+		const active = 'first';
+		const userList = ['Baisulis','Bendžamins','Biafra','Dainis','Dark Eagle','DJ EV','DrewAir','Dukts','Dzelzceļnieks','Edgars2007','Edis','Egilus','Entuziasts','Feens','Gimnazists123','Gragox','GreenZeb','Hckeins','Hien2021','Igors Cernovs','Ingii','Ivario','Jānis U.','Kaamis007','Kasp2008','Kasparoviča','Kb10076','Kikos','Kleivas','Laurijs','Ludis21345','Makenzis','Maranello Prime','MC2013','Meistars Joda','MGA73','Minorax','MNS1956','OskarsC','Papuass','Pewdiepie12321','Piebaldzēns','Pirags','RandomGuy2018','ScAvenger','Silraks','SpeedKing','Texonomial','Treisijs','Tttoooxxx','Turaids','Uldis s','Vylks','Yerachmiel Coinblatt'];
+		const userCount = 15;
+	%>
+	<div>
+		<%- include ./src/partials/nav.ejs%>
+	</div>
+	<div class="bodyContainer">
+		<%- include ./src/partials/auth_status.ejs%>
+		<h3>Balsojums par 2020. gada Vikipēdijas latviešu valodā vērtīgāko dalībnieku — pirmā kārta</h3>
+		Balsošana notiek līdz 2021. gada 14. janvārim plkst. 0.00 (pēc Latvijas laika)<br /><div style="margin-top:10px; margin-bottom: 20px;">Lai noskaidrotu 2020. gada vērtīgāko Vikipēdijas latviešu valodā dalībnieku, šogad vadīsimies pēc iepriekšējo gadu sistēmas. Lai to paveiktu, tiek rīkotas divas kārtas. Pirmā kārta domāta, lai dalībnieki varētu redzēt kopienas vērtējumu par sevi, kā arī atlasīt finālistus otrajai kārtai. Aicinām izvēlēties 15, Jūsuprāt, labākos, kvalitatīvākos un noderīgākos dalībniekus.</div>
+
+		<ul class="threeRows">
+			<% userList.forEach(function(user){ %>
+			<li>
+				<input
+					type="checkbox"
+					class="votingCheckbox"
+					id="<%= 'check'+user %>"
+					name="votingCheckbox"
+					data-user="<%= user %>"
+				/>
+				<label for="<%= 'check'+user %>"><%= user %> </label> (<a
+					href="<%= 'https://lv.wikipedia.org/wiki/Dalībnieks:'+user.replace(/ /g,'_') %>"
+					rel="noopener"
+					target="_blank"
+					>dalībnieklapa</a
+				>)
+			</li>
+			<% }) %>
+		</ul>
+
+		<div id="currentUserCount"></div>
+		<!--<button type="button" class="btn btn-primary" id="voteButton">Balsot!</button>-->
+	</div>
+</body>

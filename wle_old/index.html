@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>WLE Latvia</title>
+
+	<meta charset="utf-8" />
+	<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.css"></link>
+	<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+	
+	
+	<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/Leaflet.EasyButton/2.3.0/easy-button.min.css">
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/Leaflet.EasyButton/2.3.0/easy-button.min.js"></script>
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet-locatecontrol/0.62.0/L.Control.Locate.min.css" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet-locatecontrol/0.62.0/L.Control.Locate.min.js" charset="utf-8"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/proj4js/2.4.4/proj4-src.js"></script>
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		#map {
+			height: 100%;
+		}
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+<!--<button id="gome">Go to me</button>-->
+	<script>
+//
+proj4.defs('WGS84', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
+proj4.defs('LKS', "+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs");
+
+function escattr ( s ) {
+	return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;') ;
+}
+//decodeURIComponent(
+function createImageThumbnail ( image,size ) {
+	image = image.replace("http://commons.wikimedia.org/wiki/Special:FilePath/",  "");
+	var url = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+image+'?width='+size+'px&height='+size+'px' ;
+		var h = '' ;
+		h += "<div class='thumb'>" ;
+		h += "<a target='_blank' href='https://commons.wikimedia.org/wiki/File:" + image + "'>" ;
+		h += "<img src='" + url + "' border=0 width='"+size+"px' height='"+size+"px' alt='Loading image...' />" ;
+		h += "</a></div>" ;
+		h += "<span class='smallimgname'>" + decodeURIComponent(image) + "</span>" ;
+		return h ;
+}
+
+function create_upload_link(id,desc,lat,lng,cats) {
+	//https://commons.wikimedia.org/w/index.php?title=Special:UploadWizard&id={}&description={}&lat={}&lon={}&categories={}&descriptionlang=lv&campaign=wle-lv
+	var url = 'https://commons.wikimedia.org/w/index.php?title=Special:UploadWizard&id=';
+	url += id+'&description='+encodeURIComponent(desc)+'&lat='+lat+'&lon='+lng+'&categories='+encodeURIComponent(cats);
+	url += '&descriptionlang=lv&campaign=wle-lv';
+	
+	return url;
+}
+
+function create_popup(data,lat,lng) {
+	//["item","itemLabel","coords","image","comcat","web","sitelink","sastavno1"]
+	//vēl vajag tipu!!!
+	var aaa = [];
+	
+	var lks = proj4('WGS84','LKS',[parseFloat(lng),parseFloat(lat)]);
+	
+	aaa.push('<b>' +data.itemLabel.value + '</b>');
+	
+	if (data.image)
+		aaa.push(createImageThumbnail ( data.image.value,'200' ));
+	
+	if (data.sitelink)
+		aaa.push('<img src="wiki.png" width=15px /> <a href="'+data.sitelink.value+'">Raksts Vikipēdijā</a>');
+	
+	if (data.sastavno1)
+		aaa.push('Galvenais objekts: <a href="'+data.sastavno1.value+'">'+decodeURIComponent(data.sastavno1.value.replace('https://lv.wikipedia.org/wiki/',''))+'</a>');
+	
+	aaa.push('<img src="wdata.png" width=15px /> <a href="'+data.item.value+'">Vikidatu vienums</a>');
+	
+	aaa.push('Skatīt objektu: <a href="https://www.google.com/maps/@'+lat+','+lng+',15.25z">Google Maps</a> | <a href="http://balticmaps.eu/?lang=lv&centerx='+lks[0]+'&centery='+lks[1]+'&zoom=4">Balticmaps</a>');
+	
+	var iadt = '';
+	
+	if (data.iadt)
+		iadt = data.iadt.value;
+	
+	//c:Category:High-resolution_or_SVG_official_Wikimedia_logos
+	if (data.comcat) {
+		aaa.push('<img src="commons.png" width=12px /> <a href="https://commons.wikimedia.org/wiki/Category:'+encodeURIComponent(data.comcat.value)+'">Attēlu galerija</a>');
+		aaa.push('<span class="fa fa-image"></span> <a href="'+create_upload_link(iadt,data.itemLabel.value,lat,lng,data.comcat.value)+'">Augšupielādēt vēl attēlus</a>');
+	} else {
+		aaa.push('<span class="fa fa-image"></span> <a href="'+create_upload_link(iadt,data.itemLabel.value,lat,lng,'Protected areas of Latvia')+'">Augšupielādēt attēlus</a>');
+	}
+	
+	if (data.web)
+		aaa.push('<a href="'+data.web.value+'">Mājaslapa</a>');
+	//
+	return aaa.join('<br>');
+}
+//
+
+/*select ?item ?itemLabel ?coords ?image ?comcat ?web ?sitelink ?sastavno1 ?iadt {
+  ?item wdt:P17 wd:Q211 .
+  values ?itemtype {wd:Q11876497 wd:Q28055306 wd:Q28055278 wd:Q28054706 wd:Q28055269 wd:Q29549240 }
+  ?item wdt:P31 ?itemtype;
+        wdt:P625 ?coords .
+  optional { ?item wdt:P18 ?image }
+  optional { ?item wdt:P373 ?comcat }
+  optional { ?item wdt:P856 ?web }
+  optional { ?item wdt:P4029 ?iadt }
+  optional { ?item wdt:P527 ?sastavno. ?sastavno1 schema:about ?sastavno; schema:isPartOf <https://lv.wikipedia.org/> }
+  
+  optional {?sitelink schema:about ?item; schema:isPartOf <https://lv.wikipedia.org/>}
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "lv,en". }
+}
+*/
+$.getJSON('https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=%23WLE%20Latvia-2018%0Aselect%20%3Fitem%20%3FitemLabel%20%3Fcoords%20%3Fimage%20%3Fcomcat%20%3Fweb%20%3Fsitelink%20%3Fsastavno1%20%3Fiadt%20%7B%0A%20%20%3Fitem%20wdt%3AP17%20wd%3AQ211%20.%0A%20%20values%20%3Fitemtype%20%7Bwd%3AQ11876497%20wd%3AQ28055306%20wd%3AQ28055278%20wd%3AQ28054706%20wd%3AQ28055269%20wd%3AQ29549240%20%7D%0A%20%20%3Fitem%20wdt%3AP31%20%3Fitemtype%3B%0A%20%20%20%20%20%20%20%20wdt%3AP625%20%3Fcoords%20.%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP18%20%3Fimage%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP373%20%3Fcomcat%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP856%20%3Fweb%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP4029%20%3Fiadt%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP527%20%3Fsastavno.%20%3Fsastavno1%20schema%3Aabout%20%3Fsastavno%3B%20schema%3AisPartOf%20%3Chttps%3A%2F%2Flv.wikipedia.org%2F%3E%20%7D%0A%20%20%0A%20%20optional%20%7B%3Fsitelink%20schema%3Aabout%20%3Fitem%3B%20schema%3AisPartOf%20%3Chttps%3A%2F%2Flv.wikipedia.org%2F%3E%7D%0A%20%20SERVICE%20wikibase%3Alabel%20%7B%20bd%3AserviceParam%20wikibase%3Alanguage%20%22lv%2Cen%22.%20%7D%0A%7D&format=json', function (list) {
+	
+
+//$.getJSON('query(2).json', function(list) {
+	var one = L.layerGroup();
+	var two = L.layerGroup();
+	
+	var stats = {
+		"totalCount": 0,
+		"imageCount": 0
+	};
+	var color = ['red', 'yellow', 'green'];
+	var pointlayers = ['one', 'two', 'three'];
+	for (var i = 0; i < list.results.bindings.length; i++) {
+		var colorNumber = 0;
+		var popupContent = "<b>" + list.results.bindings[i].itemLabel.value + "</b>";
+		stats["totalCount"]++;
+		if (list.results.bindings[i].image) {
+			stats["imageCount"]++;
+			colorNumber++;
+			addTogroup = one;
+		} else {
+			addTogroup = two;
+		}
+		
+		
+		if (list.results.bindings[i].coords) {
+			stats["coordinateCount"]++;
+			var coordText = list.results.bindings[i].coords.value.split('(');
+			var latlngText = coordText[1].split(' ');
+			var lng = latlngText[0];
+			var lngText = latlngText[1];
+			var lat = lngText.substring(0, lngText.length - 1);
+			var latlng = L.latLng(lat, lng);
+			
+			popupContent = create_popup(list.results.bindings[i],lat,lng);
+			
+			var marker = L.circleMarker(latlng, {
+				radius: 7.5,
+				color: 'black',
+				fillOpacity: 1,
+				fillColor: color[colorNumber]
+			}).bindPopup(popupContent).addTo(addTogroup);
+		}
+	}
+	
+	
+	
+
+	/*
+	L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.').addTo(one),
+	L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.').addTo(one),
+	L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.').addTo(one),
+	L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.').addTo(one);
+	*/
+	
+	var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+		'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+		'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+	var grayscale = L.tileLayer(mbUrl, {
+			id: 'mapbox.light',
+			attribution: mbAttr
+		}),
+		streets = L.tileLayer(mbUrl, {
+			id: 'mapbox.streets',
+			attribution: mbAttr
+		}),
+		satellite = L.tileLayer(mbUrl, {
+			id: 'mapbox.streets-satellite',
+			attribution: mbAttr
+		});
+
+	var map = L.map('map', {
+		center: [56.761756, 24.5434],
+		zoom: 8,
+		layers: [streets, one, two]
+	});
+
+
+	var baseLayers = {
+		"Melnbaltā": grayscale,
+		"Krāsainā": streets,
+		"Satelīts": satellite
+	};
+
+	var overlays = {
+		'<span style="display:inline-block; width:1.5em; height:1em; margin:1px 0; border:1px solid black; background-color:yellow;"></span> Ir attēls': one,
+		'<span style="display:inline-block; width:1.5em; height:1em; margin:1px 0; border:1px solid black; background-color:red;"></span> Nav attēla': two
+	};
+	L.control.layers(baseLayers, overlays).addTo(map);
+	/*
+	L.easyButton( '<span class="star">&starf;</span>', function(){
+  alert('you just clicked the html entity \&starf;');
+}).addTo(map);
+*/
+/*
+L.Control.MyLocate = L.Control.Locate.extend({
+   _drawMarker: function(e) {
+     var marker = L.marker([e.latitude, e.longitude]).bindPopup('Your are here :)');
+	 map.addLayer(marker);
+   }
+});
+
+	L.control.locate().addTo(map);
+*/
+
+L.easyButton('<i class="fa fa-map-marker" aria-hidden="true"></i>', function(btn, map){
+  map.locate({setView: true, watch:false, maxZoom: 13});
+}).addTo(map);
+
+map.on('locationfound', function (event) {
+    var Test = L.marker([event.latitude, event.longitude]).bindPopup('I\'m here :)').addTo(map);
+	
+	
+	//L.popup().setContent("Your Location").setLatLng(event.latlng).addTo(map);
+});
+	
+function my_loc() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        x.innerHTML = "Geolocation is not supported by this browser.";
+    }
+}
+
+
+function showPosition(position) {
+	L.circleMarker([position.coords.latitude, position.coords.longitude], {
+				radius: 5,
+				color: 'pink',
+				fillOpacity: 1,
+				fillColor: 'pink'
+			}).bindPopup('my hauz').addTo(map)
+}
+	
+//my_loc();
+});
+</script>
+</body>
+</html>

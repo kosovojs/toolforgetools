@@ -1,0 +1,46 @@
+[
+    {
+        "name": "websitebeaver/simple-mysqli",
+        "version": "1.5.5",
+        "version_normalized": "1.5.5.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/WebsiteBeaver/Simple-MySQLi.git",
+            "reference": "14f3d25f8a794051f2517297d493b01477d0f535"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/WebsiteBeaver/Simple-MySQLi/zipball/14f3d25f8a794051f2517297d493b01477d0f535",
+            "reference": "14f3d25f8a794051f2517297d493b01477d0f535",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=7.1.0"
+        },
+        "time": "2018-09-21T02:27:57+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "simple-mysqli.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Daniel Marcus",
+                "email": "daniel@websitebeaver.com"
+            }
+        ],
+        "description": "Wrapper class for MySQLi prepared statements",
+        "keywords": [
+            "database",
+            "mysql",
+            "mysqli",
+            "prepared"
+        ]
+    }
+]

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title tt="toolname">external IDs</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Load required Bootstrap and BootstrapVue CSS -->
+		<link type="text/css" rel="stylesheet"
+			href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" />
+		<link type="text/css" rel="stylesheet"
+			href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap-vue/2.21.2/bootstrap-vue.min.css" />
+
+		<!-- Load Vue followed by BootstrapVue -->
+		<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/vue/2.6.9/vue.min.js"></script>
+		<script
+			src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap-vue/2.21.2/bootstrap-vue.min.js"></script>
+
+		<!-- Load the following for BootstrapVueIcons support -->
+		<script
+			src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap-vue/2.21.2/bootstrap-vue-icons.min.js"></script>
+	</head>
+
+	<body>
+		<div id="app">
+			<div>
+				<span style="margin-bottom: 10px; font-weight: bold">In total: {{rows}}</span>
+				<b-table striped hover :per-page="perPage" :current-page="currentPage" :items="datalist" :busy="isBusy">
+					<template v-slot:cell(article)="data">
+						<!-- `data.value` is the value after formatted by the Formatter -->
+						<a :href="`https://lv.wikipedia.org/wiki/${data.value.replace(/\s/i,'_')}`">{{ data.value }}</a>
+					</template>
+
+					<template v-slot:table-busy>
+						<div class="text-center text-danger my-2">
+							<b-spinner class="align-middle"></b-spinner>
+							<strong>Loading...</strong>
+						</div>
+					</template>
+				</b-table>
+
+				<b-pagination align="right" v-model="currentPage" :total-rows="rows" :per-page="perPage"
+					aria-controls="my-table"></b-pagination>
+				<b-button variant="primary" v-on:click="start">Start updating</b-button>
+			</div>
+		</div>
+	</body>
+	<style>
+		#app {
+			margin: 1vw;
+		}
+	</style>
+
+	<script>
+		var app = new Vue({
+			// app initial state
+			data: {
+				perPage: 20,
+				currentPage: 1,
+				isBusy: false,
+				fields: [{
+					key: 'article',
+					label: 'article',
+					sortable: true,
+				}, {
+					key: 'url',
+					label: 'URL',
+					sortable: true,
+				}, {
+					key: 'status',
+					label: 'Statuss',
+				},],
+				datalist: [],
+				status: 'init',
+				currentlyEditing: 0,
+			},
+			mounted() {
+				this.init();
+			},
+
+			computed: {
+				rows() {
+					return this.datalist.length;
+				},
+			},
+
+			methods: {
+				async start() {
+					// https://quickstatements.toolforge.org/#/v1=Q211|Llv|"96480189"||Q211|Llv|"96480189"||Q211|Llv|"96480189"
+
+					const finalList = this.datalist.map((entry) => {
+						const {
+							wditem,
+							label
+						} = entry;
+
+						return `${wditem}|Llv|"${label}"`;
+					});
+
+					window.open(`https://quickstatements.toolforge.org/#/v1=${finalList.join('||')}`, '_blank');
+				},
+
+				toggleBusy() {
+					this.isBusy = !this.isBusy;
+				},
+				init: function (event) {
+					this.getCandidates();
+				},
+				async getCandidates() {
+					this.isBusy = true;
+
+					const res = await fetch('//edgars.toolforge.org/ext-ids/fetch.php');
+					const jsonResp = await res.json();
+
+					const finalList = jsonResp.data.map((entry) => {
+						const [wiki, article, url] = entry;
+
+						return {
+							wiki, article, url,
+							status: 'init',
+						};
+					});
+
+					this.datalist = finalList;
+
+					this.isBusy = false;
+				},
+				clean: function () {
+					this.izveletais = '';
+					this.comment = '';
+				},
+			},
+		});
+
+		app.$mount('#app');
+	</script>
+
+</html>

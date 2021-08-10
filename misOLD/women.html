@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/selectize.js/0.12.4/js/standalone/selectize.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/selectize.js/0.12.4/css/selectize.min.css">
+<script src="common.js"></script>
+<title>Sievietes</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<span id="last_upd"></span>
+<br>
+<span id="ToC"></span>
+<span id="fdfsdfoobarlorem12312dsfdf12"></span>
+<script>
+var theSortOrder = ["2010s", "2000s", "1990s", "1980s", "1970s", "1960s", "1950s", "1940s", "1930s", "1920s", "1910s", "1900s", "20. gs", "1890s", "1880s", "1870s", "1860s", "1850s", "1840s", "1830s", "1820s", "1810s", "1800s", "19. gs", "18. gs", "17. gs", "16. gs", "15. gs", "14. gs", "13. gs", "12. gs", "11. gs", "10. gs", "9. gs", "8. gs", "7. gs", "6. gs", "5. gs", "4. gs", "3. gs", "2. gs", "1. gs", "1. gs pme", "2. gs pme", "3. gs pme", "4. gs pme", "5. gs pme", "6. gs pme", "7. gs pme", "8. gs pme", "9. gs pme", "11. gs pme", "12. gs pme", "13. gs pme", "14. gs pme", "15. gs pme", "16. gs pme", "18. gs pme", "19. gs pme", "20. gs pme", "21. gs pme", "23. gs pme", "24. gs pme", "25. gs pme", "26. gs pme", "27. gs pme", "28. gs pme", "29. gs pme", "30. gs pme", "34. gs pme", "37. gs pme", "40. gs pme", "41. gs pme", "", "DIDNOT. gs", "pme"];
+
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+Array.prototype.unique = function() {
+  return this.filter(function (value, index, self) { 
+    return self.indexOf(value) === index;
+  });
+}
+
+function compare(a, b){
+  let comparison = 0;
+
+  if (a > b) {
+    comparison = -1;
+  } else if (b > a) {
+    comparison = 1;
+  }
+
+  return comparison;
+}
+
+function compare1(a, b){
+  let comparison = 0;
+  a = parseInt(a[1]);
+  b = parseInt(b[1]);
+
+  if (a > b) {
+    comparison = -1;
+  } else if (b > a) {
+    comparison = 1;
+  }
+
+  return comparison;
+}
+
+function make_ToC(data) {
+	var toc = [];
+	
+	toc.push('<div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;"><ul>');
+	
+	for (i = 0; i < data.length; i++) {
+		if (data[i]=='')
+			data[i] = 'No year';
+		
+		toc.push('<li><a href="#'+data[i]+'">'+data[i]+'</a></li>');
+	}
+	toc.push('</ul></div>');
+	
+	$('#ToC').html(toc.join('\n'));
+}
+
+function main(data123) {
+	//var mykeys = Object.keys(data123);
+	mykeys = theSortOrder;
+	
+	make_ToC(mykeys);
+	
+	var aaa = [];
+	
+	for (z = 0; z < mykeys.length; z++) {
+		var data_for_table = data123[mykeys[z]];
+		
+		if (!data_for_table) {
+			continue;
+		}
+		
+		if (mykeys[z]=='')
+			mykeys[z] = 'No year';
+		aaa.push('<a id="'+mykeys[z]+'"></a><h3>'+mykeys[z]+'</h3>');
+		
+		if (data_for_table.length>20)
+			aaa.push('<div style="-moz-column-count:3; -webkit-column-count:3; column-count:3;">');
+		aaa.push('<ul>');
+		
+		for (y = 0; y < data_for_table.length; y++) {
+			if (y==200) {break;}
+			aaa.push('<li>'+create_wp_link('en',data_for_table[y][0],data_for_table[y][0])+' - '+data_for_table[y][1]+' <small>('+data_for_table[y][2]+')</small></li>');
+		}
+		aaa.push('</ul>');
+		if (data_for_table.length>20)
+			aaa.push('</div>');
+	}
+	return aaa.join('')+'';
+}
+
+function create_link(site,href,label) {
+	if (site=='d') {
+		return '<a href="https://www.wikidata.org/wiki/'+href+'">'+label+'</a>'
+	} else if (site=='sr') {
+		return '<a href="http://www.sports-reference.com/olympics/athletes/'+href+'.html">'+label+' <small>('+href+')</small></a>'
+	}
+}
+
+function create_wp_link(lang,href,label) {
+	return '<a target="_blank" href="https://'+lang+'.wikipedia.org/wiki/'+href+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+$(document).ready(function () {
+	$.ajax({
+		type: "GET",
+		url: 'api.php',                  //the script to call to get data          
+		data: {'act':'get_data2','val':'women'},                        //you can insert url argumnets here to pass to api.php
+		dataType: 'json'                //data format  
+		//async: false		
+		})
+		.done(function(data1) {          //on recieve of reply
+			console.log('tgrfgfrddddddddddddf');
+			console.log(data1);
+			console.log(data1['data']);
+			$('#last_upd').html('Dati pēdējoreiz atjaunināti: '+data1['update']);
+			//datt = JSON.parse(data1['data']);
+			
+			
+			var resdata = main(data1['data']);
+			$('#fdfsdfoobarlorem12312dsfdf12').html(resdata);
+		})
+});
+
+</script>
+</body>
+</html>

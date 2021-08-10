@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="common.js"></script>
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
+<script src="typeahead111.js"></script>
+-->
+<title>Jauns ieraksts</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">FIFA 2018</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="new.html">Jauns raksts</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<span id="only_logged"></span>
+<span id="add_status"></span>
+<br>
+<form>
+  <div class="row">
+  <div class="col-md-8">
+  <div class="form-group">
+    <label>Raksts</label>
+    <input class="form-control" id="inputArticle" placeholder="2018. gada FIFA Pasaules kauss">
+  </div>
+  </div>
+  <div class="col-md-4">
+  <div class="form-group">
+    <label>Raksta autors</label>
+    <input class="form-control typeahead" id="inputAuthor" placeholder="Piemērs">
+  </div>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-md-3">
+  <div class="form-group">
+    <label>Jauns raksts</label> <span class="top" title="Ja esi izveidojis rakstu, tad saņem 1 punktu par to"><span class="glyphicon glyphicon-question-sign"></span></span>
+	
+    <div class="input-group">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-danger btn-number"  data-type="minus" data-field="quant[2]">
+                <span class="glyphicon glyphicon-minus"></span>
+              </button>
+          </span>
+          <input type="text" name="quant[2]" class="form-control input-number" id="inputNew" value="0" min="0" max="1">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-success btn-number" data-type="plus" data-field="quant[2]">
+                  <span class="glyphicon glyphicon-plus"></span>
+              </button>
+          </span>
+      </div>
+  </div>
+  </div>
+  <div class="col-md-3">
+  <div class="form-group">
+    <label>Apjoms</label> <span class="top" title="Par katru pilno baitu  tūkstoti saņem 1 punktu"><span class="glyphicon glyphicon-question-sign"></span></span>
+	
+    <div class="input-group">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-danger btn-number"  data-type="minus" data-field="quant[3]">
+                <span class="glyphicon glyphicon-minus"></span>
+              </button>
+          </span>
+          <input type="text" name="quant[3]" class="form-control input-number" id="inputSize" value="10" min="0" max="1000">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-success btn-number" data-type="plus" data-field="quant[3]">
+                  <span class="glyphicon glyphicon-plus"></span>
+              </button>
+          </span>
+      </div>
+  </div>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-md-3">
+  <div class="form-group">
+    <label>Attēli</label> <span class="top" title="Par pievienotajiem attēliem saņem 1 punktu"><span class="glyphicon glyphicon-question-sign"></span></span>
+	
+    <div class="input-group">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-danger btn-number"  data-type="minus" data-field="quant[4]">
+                <span class="glyphicon glyphicon-minus"></span>
+              </button>
+          </span>
+          <input type="text" name="quant[4]" class="form-control input-number" id="inputImages" value="10" min="0" max="1">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-success btn-number" data-type="plus" data-field="quant[4]">
+                  <span class="glyphicon glyphicon-plus"></span>
+              </button>
+          </span>
+      </div>
+  </div>
+  </div>
+  <div class="col-md-3">
+  <div class="form-group">
+    <label>Vikidati</label> <span class="top" title="Šeit tiek ieskaitīts vienīgi papildinājums apgalvojumu (un ārējo identifikatoru) sadaļā. Maksimālais punktu skaits: 1"><span class="glyphicon glyphicon-question-sign"></span></span>
+	
+    <div class="input-group">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-danger btn-number"  data-type="minus" data-field="quant[5]">
+                <span class="glyphicon glyphicon-minus"></span>
+              </button>
+          </span>
+          <input type="text" name="quant[5]" class="form-control input-number" id="inputWikidata" value="0" min="0" max="1">
+          <span class="input-group-btn">
+              <button type="button" class="btn btn-success btn-number" data-type="plus" data-field="quant[5]">
+                  <span class="glyphicon glyphicon-plus"></span>
+              </button>
+          </span>
+      </div>
+  </div>
+  </div>
+  </div>
+</form>
+<span id="complete"></span>
+<br>
+<button class="btn btn-default" id="submit-data">Saglabāt</button>
+</div>
+<script>
+//plugin bootstrap minus and plus
+//https://bootsnipp.com/snippets/featured/buttons-minus-and-plus-in-input
+//http://jsfiddle.net/laelitenetwork/puJ6G/
+$('.btn-number').click(function(e){
+    e.preventDefault();
+    
+    fieldName = $(this).attr('data-field');
+    type      = $(this).attr('data-type');
+    var input = $("input[name='"+fieldName+"']");
+    var currentVal = parseInt(input.val());
+    if (!isNaN(currentVal)) {
+        if(type == 'minus') {
+            
+            if(currentVal > input.attr('min')) {
+                input.val(currentVal - 1).change();
+            } 
+            if(parseInt(input.val()) == input.attr('min')) {
+                $(this).attr('disabled', true);
+            }
+
+        } else if(type == 'plus') {
+
+            if(currentVal < input.attr('max')) {
+                input.val(currentVal + 1).change();
+            }
+            if(parseInt(input.val()) == input.attr('max')) {
+                $(this).attr('disabled', true);
+            }
+
+        }
+    } else {
+        input.val(0);
+    }
+});
+$('.input-number').focusin(function(){
+   $(this).data('oldValue', $(this).val());
+});
+$('.input-number').change(function() {
+    
+    minValue =  parseInt($(this).attr('min'));
+    maxValue =  parseInt($(this).attr('max'));
+    valueCurrent = parseInt($(this).val());
+    
+    name = $(this).attr('name');
+    if(valueCurrent >= minValue) {
+        $(".btn-number[data-type='minus'][data-field='"+name+"']").removeAttr('disabled')
+    } else {
+        alert('Sorry, the minimum value was reached');
+        $(this).val($(this).data('oldValue'));
+    }
+    if(valueCurrent <= maxValue) {
+        $(".btn-number[data-type='plus'][data-field='"+name+"']").removeAttr('disabled')
+    } else {
+        alert('Sorry, the maximum value was reached');
+        $(this).val($(this).data('oldValue'));
+    }
+    
+    
+    var sum = 0;
+    $('.input-number').each(function() {
+        sum += Number($(this).val());
+    });
+	$('#complete').html('Kopējais punktu skaits par šo rakstu: '+ sum.toString());
+    // here, you have your sum
+});
+$(".input-number").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 190]) !== -1 ||
+             // Allow: Ctrl+A
+            (e.keyCode == 65 && e.ctrlKey === true) || 
+             // Allow: home, end, left, right
+            (e.keyCode >= 35 && e.keyCode <= 39)) {
+                 // let it happen, don't do anything
+                 return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+window.onload = function() {
+  $('input').val('');
+  $('.input-number').val('0');
+  
+  
+  }
+  $(".top").tooltip({
+    placement: "top"
+});
+
+/////////////////////////////
+/*
+$("#inputAuthor").typeahead({
+      ajax: {
+        url: 'https://lv.wikipedia.org/w/api.php?callback=?',
+        timeout: 200,
+        triggerLength: 2,
+        method: 'get',
+        preDispatch: query => {
+          return {
+            action: 'query',
+            list: 'prefixsearch',
+            format: 'json',
+            psnamespace: 2,
+            pssearch: 'Dalībnieks:'+query
+          };
+        },
+        preProcess: data => {
+          const results = data.query.prefixsearch.map(elem => {
+            return elem.title.split('/')[0].substr(elem.title.indexOf(':') + 1);
+          }).unique();
+          return results;
+        }
+      }
+});
+
+*/
+$(document).on('click', '#submit-data', function(){
+    console.log('going to save');
+	var data = {};
+	
+	if(!($('#inputArticle').val() && $('#inputAuthor').val())) {
+		//console.log('not filled');
+		alert('Raksta un autora laukam jābūt aizpildītiem!');
+	} else {
+		data.article = $('#inputArticle').val();
+		data.author = $('#inputAuthor').val();
+		data.new = $('#inputNew').val();
+		data.size = $('#inputSize').val();
+		data.images = $('#inputImages').val();
+		data.wikidata = $('#inputWikidata').val();
+		console.log(data);
+		/*
+		
+		var posting = $.post('api.php', {
+				'action': 'new',
+				'data': data
+			}, function(data1) {
+				console.log('yes!');
+			}, "json");
+			
+			posting.done(function(data) {
+    console.log( data );
+  });
+  
+  */
+  
+  ////////////////
+	//https://stackoverflow.com/questions/7439606/jquery-ajax-post-success-error-function
+     $.ajax({
+        type: "post",
+        url: "../oauth.php",
+        dataType:"json",
+		//action: 'new',
+        data: {'data':data,'action':'new_article_to_jury'},
+    })
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+			if(response.status === "success") {
+                console.log('yes');
+				$('#only_logged').html( '<div class="alert alert-success" role="alert">Raksts tika veiksmīgi pievienots!</div>' );
+				
+            } else if(response.status === "error") {
+                console.log('no');
+				$('#only_logged').html( '<div class="alert alert-warning" role="alert">Raksts netika pievienots. Sazinies ar autoru!</div>' );
+            }
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+		});
+
+    /*
+	$.ajax({
+		type: "POST",
+		url: 'api.php',
+        dataType:"json",
+		data: {
+			'data':data,'action':'new'
+		},
+		success: function(response) {
+			// We get the element having id of display_info and put the response inside it
+
+			//console.log('were here32132');
+			//$( '#display_info' ).html('hghfghfghfgh');
+                console.log(response);
+			//loadNextItem();
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest['responseText']);
+		}
+	});
+	*/
+  ////////////
+		
+	}
+	
+});
+
+
+$('#postride').submit(function(event) {
+     event.preventDefault();
+     dataString = $("#postride").serialize();
+    return false;
+});
+
+</script>
+</body>
+</html>

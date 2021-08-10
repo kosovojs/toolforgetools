@@ -1,0 +1,246 @@
+/* stylelint-disable */
+.articlePreview {
+	font-size: 1rem;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+	letter-spacing: 0.00938em;
+	
+	margin: 15px;
+	min-width: 95%;
+	max-width: 100%;
+
+	table.ambox {
+		margin: 0 10%;
+		border: 1px solid #aaa;
+		border-left: 10px solid #1e90ff;
+		background: #fbfbfb;
+	}
+	
+	#coordinates {
+		display: none;
+	}
+	
+	.infobox {
+		border: 1px solid #aaa;
+		background-color: #f9f9f9;
+		color: black;
+		/* @noflip */
+		margin: 0.5em 0 0.5em 1em;
+		padding: 0.2em;
+		/* @noflip */
+		float: right;
+		/* @noflip */
+		clear: right;
+		/* @noflip */
+		font-size: 88%;
+	}
+	
+	.skin-monobook .hlist dl,
+	.skin-modern .hlist dl,
+	.skin-vector .hlist dl {
+		line-height: 1.5em;
+	}
+	/* Style for horizontal lists (separator following item).
+	   @source mediawiki.org/wiki/Snippets/Horizontal_lists
+	   @revision 8 (2016-05-21)
+	   @author [[User:Edokter]]
+	 */
+	.hlist dl,
+	.hlist ol,
+	.hlist ul {
+		margin: 0;
+		padding: 0;
+	}
+	/* Display list items inline */
+	.hlist dd,
+	.hlist dt,
+	.hlist li {
+		margin: 0;
+		display: inline;
+	}
+	/* Display nested lists inline */
+	.hlist.inline,
+	.hlist.inline dl,
+	.hlist.inline ol,
+	.hlist.inline ul,
+	.hlist dl dl,
+	.hlist dl ol,
+	.hlist dl ul,
+	.hlist ol dl,
+	.hlist ol ol,
+	.hlist ol ul,
+	.hlist ul dl,
+	.hlist ul ol,
+	.hlist ul ul {
+		display: inline;
+	}
+	/* Hide empty list items */
+	.hlist .mw-empty-li {
+		display: none;
+	}
+	/* Generate interpuncts */
+	.hlist dt:after {
+		content: ': ';
+	}
+	.hlist dd:after,
+	.hlist li:after {
+		content: ' · ';
+		font-weight: bold;
+	}
+	.hlist dd:last-child:after,
+	.hlist dt:last-child:after,
+	.hlist li:last-child:after {
+		content: none;
+	}
+	/* Add parentheses around nested lists */
+	.hlist dd dd:first-child:before,
+	.hlist dd dt:first-child:before,
+	.hlist dd li:first-child:before,
+	.hlist dt dd:first-child:before,
+	.hlist dt dt:first-child:before,
+	.hlist dt li:first-child:before,
+	.hlist li dd:first-child:before,
+	.hlist li dt:first-child:before,
+	.hlist li li:first-child:before {
+		content: ' (';
+		font-weight: normal;
+	}
+	.hlist dd dd:last-child:after,
+	.hlist dd dt:last-child:after,
+	.hlist dd li:last-child:after,
+	.hlist dt dd:last-child:after,
+	.hlist dt dt:last-child:after,
+	.hlist dt li:last-child:after,
+	.hlist li dd:last-child:after,
+	.hlist li dt:last-child:after,
+	.hlist li li:last-child:after {
+		content: ')';
+		font-weight: normal;
+	}
+	/* Put ordinals in front of ordered list items */
+	.hlist ol {
+		counter-reset: listitem;
+	}
+	.hlist ol > li {
+		counter-increment: listitem;
+	}
+	.hlist ol > li:before {
+		content: ' ' counter(listitem) '\a0';
+	}
+	.hlist dd ol > li:first-child:before,
+	.hlist dt ol > li:first-child:before,
+	.hlist li ol > li:first-child:before {
+		content: ' (' counter(listitem) '\a0';
+	}
+	
+	/* Unbulleted lists */
+	.plainlist ol,
+	.plainlist ul {
+		line-height: inherit;
+		list-style: none none;
+		margin: 0;
+	}
+	.plainlist ol li,
+	.plainlist ul li {
+		margin-bottom: 0;
+	}
+	
+	/* Default style for navigation boxes */
+	.navbox {
+		/* Navbox container style */
+		border: 1px solid #aaa;
+		width: 100%;
+		margin: auto;
+		clear: both;
+		font-size: 88%;
+		text-align: center;
+		padding: 1px;
+	}
+	.navbox-inner,
+	.navbox-subgroup {
+		width: 100%;
+	}
+	.navbox-group,
+	.navbox-title,
+	.navbox-abovebelow {
+		padding: 0.25em 1em; /* Title, group and above/below styles */
+		line-height: 1.5em;
+		text-align: center;
+	}
+	th.navbox-group {
+		/* Group style */
+		white-space: nowrap;
+		/* @noflip */
+		text-align: right;
+	}
+	.navbox,
+	.navbox-subgroup {
+		background: #fdfdfd; /* Background color */
+	}
+	.navbox-list {
+		line-height: 1.8em;
+		border-color: #fdfdfd; /* Must match background color */
+	}
+	.navbox th,
+	.navbox-title {
+		background: #ccccff; /* Level 1 color */
+	}
+	.navbox-abovebelow,
+	th.navbox-group,
+	.navbox-subgroup .navbox-title {
+		background: #ddddff; /* Level 2 color */
+	}
+	.navbox-subgroup .navbox-group,
+	.navbox-subgroup .navbox-abovebelow {
+		background: #e6e6ff; /* Level 3 color */
+	}
+	.navbox-even {
+		background: #f7f7f7; /* Even row striping */
+	}
+	.navbox-odd {
+		background: transparent; /* Odd row striping */
+	}
+	table.navbox + table.navbox {
+		/* Single pixel border between adjacent navboxes */
+		margin-top: -1px; /* (doesn't work for IE6, but that's okay)       */
+	}
+	.navbox .hlist td dl,
+	.navbox .hlist td ol,
+	.navbox .hlist td ul,
+	.navbox td.hlist dl,
+	.navbox td.hlist ol,
+	.navbox td.hlist ul {
+		padding: 0.125em 0; /* Adjust hlist padding in navboxes */
+	}
+	ol + table.navbox,
+	ul + table.navbox {
+		margin-top: 0.5em; /* Prevent lists from clinging to navboxes */
+	}
+	
+	@media print {
+		.navbox {
+			display: none;
+		}
+	}
+	
+	.mw-redirect {
+		color: green;
+	}
+
+	a.new {
+		color: #ba0000;
+	}
+
+	.geo-multi-punct {
+		visibility: hidden;
+	}
+	.geo-nondefault {
+		visibility: hidden;
+	}
+
+	.mw-disambig {
+		background-color: #ff9191;
+	}
+	
+}

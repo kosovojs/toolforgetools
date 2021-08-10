@@ -1,0 +1,213 @@
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			body {
+				font-family: 'Helvetica Neue', 'Lucida Grande', Tahoma, Verdana, sans-serif;
+				font-size: 14px;
+			}
+
+			a {
+				color: #0645AD;
+				text-decoration: none;
+			}
+
+			h1 {
+				font-size: 20px;
+				font-weight: normal;
+			}
+
+			h2 {
+				font-size: 16px;
+				font-weight: normal;
+			}
+
+			.box {
+				border: 1px solid #dbd9db;
+				padding: 10px;
+				margin-bottom: 50px;
+				display: none;
+				line-height: 1.5;
+			}
+
+			.source {
+				border: 1px solid #dbd9db;
+				width: 100%;
+				position: relative;
+				top: 20px;
+			}
+
+			.check {
+				box-sizing: border-box;
+				height: 100%;
+				width: 60px;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				z-index: 10;
+				padding-top: 30px;
+				font-size: 50px;
+				color: #FFF;
+				background-color: #FFF;
+				text-align: center;
+				cursor: pointer;
+			}
+
+			.sourcecontent {
+				box-sizing: border-box;
+				width: 100%;
+				min-height: 120px;
+				padding: 10px 70px;
+				position: relative;
+				top: 0px;
+				left: 0px;
+				z-index: 9;
+			}
+
+			.check:hover {
+				background-color: #eddd90;
+				color: #000;
+			}
+
+			.value {
+				background-color: #eddd90;
+				border: 1px solid #0645AD;
+				padding: 1px;
+				cursor: pointer;
+			}
+
+			.highlighted {
+				color: #FF0000;
+				font-weight: bold;
+			}
+
+			.active {
+				background-color: #eddd90;
+			}
+
+			#main-overview {
+				width: 250px;
+				border-right: 1px solid #dbd9db;
+				margin-top: 50px;
+				padding: 20px;
+				height: auto;
+			}
+
+			#warnings {
+				position: absolute;
+				left: 350px;
+				top: 200px;
+			}
+
+			#main-overview a {
+				display: block;
+				width: 100%;
+				margin: 0px;
+			}
+
+			#main-item {
+				position: absolute;
+				left: 350px;
+				top: 250px;
+			}
+
+			#wikipediapage {
+				position: absolute;
+				left: 350px;
+				top: 250px;
+			}
+
+			#wikitext {
+				position: absolute;
+				left: 350px;
+				top: 250px;
+			}
+
+			.button {
+				border: 1px solid #dbd9db;
+				border-radius: 3px;
+				width: 210px;
+				margin: 20px 0px 0px 20px;
+				padding: 10px 0px;
+				text-align: center;
+				display: inline-block;
+				color: #000;
+			}
+
+			.button:hover {
+				background-color: #dbd9db;
+			}
+
+			#menumiddle {
+				text-align: center;
+				width: 100%;
+				display: inline-block;
+			}
+
+			select {
+				border: 1px solid #dbd9db;
+				border-radius: 3px;
+				width: 210px;
+				margin: 20px 0px 0px 20px;
+				position: absolute;
+			}
+
+			#yearlist {
+				padding: 5px 70px;
+			}
+
+			#propertylist {
+				padding: 5px 50px;
+			}
+
+			#propertylist option,
+			#yearlist option {
+				padding: 5px 70px;
+				border-bottom: 1px solid #dbd9db;
+			}
+
+			#buttons {
+				display: inline-block;
+				position: absolute;
+				left: 350px;
+				top: 70px;
+			}
+		</style>
+		<script type="text/javascript"
+			src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css"
+			href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+		<script type="text/javascript" src="app.js"></script>
+	</head>
+
+	<body>
+		<div id="menumiddle">
+			<a class="button" href="#">previous</a>
+			<a class="button" href="#">next</a>
+		</div>
+		<div id="main-overview">
+			<input type="text" class="form-control" id='input-petscan' placeholder="petscan id"
+				aria-describedby="basic-addon1">
+			<input type="text" class="form-control" id='input-lang' placeholder="wikicode"
+				aria-describedby="basic-addon1">
+			<button class="btn btn-primary btn-danger" id='btn-load'>load</button>
+			<div id="wd_items"></div>
+		</div>
+		<div id='buttons'>
+			<a href="#" class="btn btn-primary btn-danger" id='btn-nodob'>No DOB</a>
+			<input type="text" class="form-control" id='btn-raw' placeholder="Raw text" aria-describedby="basic-addon1">
+			<a href="#" class="btn btn-primary btn-success" id='btn-yes'>Good</a>
+		</div>
+		<div id="title_section"></div>
+		<div id="warnings"></div>
+		<div id="wikitext"></div>
+		<div id="wikipediapage"></div>
+
+		<div id="display_info"></div>
+		<div id="main-item">
+		</div>
+
+	</body>
+
+</html>

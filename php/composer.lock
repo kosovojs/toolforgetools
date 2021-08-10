@@ -1,0 +1,60 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "6b64a9f98810917282e863ec450cc192",
+    "packages": [
+        {
+            "name": "websitebeaver/simple-mysqli",
+            "version": "1.5.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WebsiteBeaver/Simple-MySQLi.git",
+                "reference": "14f3d25f8a794051f2517297d493b01477d0f535"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WebsiteBeaver/Simple-MySQLi/zipball/14f3d25f8a794051f2517297d493b01477d0f535",
+                "reference": "14f3d25f8a794051f2517297d493b01477d0f535",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "simple-mysqli.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Marcus",
+                    "email": "daniel@websitebeaver.com"
+                }
+            ],
+            "description": "Wrapper class for MySQLi prepared statements",
+            "keywords": [
+                "database",
+                "mysql",
+                "mysqli",
+                "prepared"
+            ],
+            "time": "2018-09-21T02:27:57+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

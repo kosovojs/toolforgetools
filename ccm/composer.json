@@ -1,0 +1,11 @@
+{
+    "require": {
+        "websitebeaver/simple-mysqli": "^1.5",
+        "respect/validation": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "CCM\\": "api_classes/"
+        }
+    }
+}

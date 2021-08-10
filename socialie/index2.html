@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="common.js"></script>
+<!--<link rel="stylesheet" type="text/css" href="wikitables.css">-->
+<title>Checking</title>
+<meta charset="utf-8" />
+<script>
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function parse_name(curr) {
+	curr = curr.replace('muižā','muiža');
+	curr = curr.replace('pilī','pils');
+	
+	return curr;
+}
+
+function create_link(site,href,label) {
+	if (site=='d') {
+		return '<a target="_blank" id="wdq" data-q="'+href+'" href="https://www.wikidata.org/wiki/'+href+'">'+label+'</a>'
+	}
+	else if (site=='g') {
+		return '<a target="_blank" href="https://www.google.com/search?q='+encodeURI(href)+'+-site:mantojums.lv+-site:wikipedia.org+-site:wikiwand.com+-site:celteka.lv">'+label+'</a>'
+	}
+}
+
+function show_text(data) {
+	console.log(data);
+	var txt = '<big><b><span id="label">'+create_link('d',data.item,data.itemLabel)+'</span></b></big> ('+create_link('g',parse_name(data.itemLabel),'meklēt')+')';
+	
+	var add = [];
+	
+	add.push(txt);
+	//add.push();
+	
+	if (data.p131 && data.p131 != null)
+		add.push('<b>Atrašanās vieta</b>: '+data.p131);
+	
+	if (data.adrese && data.adrese != null)
+		add.push('<b>Adrese</b>: '+data.adrese);
+	
+	if (data.norades && data.norades != null)
+		add.push('<b>Norādes</b>: '+data.norades + ' <small>('+create_link('g',parse_name(data.norades),'meklēt')+')</small>');
+		
+	if (data.saraksts && data.saraksts != null)
+		add.push('<b>Saraksts</b>: '+data.saraksts);
+	
+	if (data.dalaNo && data.dalaNo != null)
+		add.push('"<b>Daļa no</b>": '+data.dalaNo);
+	
+	$('#header-info').html(add.join('<br>'));
+}
+
+function doAPIpost(currWDitem,coords,ref,wd,notes,isComplex) {
+
+     $.ajax({
+        type: "post",
+        url: "oauth.php",
+        dataType:"json",
+        data: {'act':'ok','data':{'currWDitem':currWDitem,'coords':coords,'ref':ref,'wd':wd,'notes':notes,'isComplex':isComplex}}
+    })
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+			if(response.status === "good") {
+                console.log('yes');
+				$('#only_logged').html( '<div class="alert alert-success" role="alert">Ok!</div>' );
+            } else if(response.status === "error") {
+                console.log('no');
+				$('#only_logged').html( '<div class="alert alert-warning" role="alert">Radās kļūda!</div>' );
+            }
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+		});
+}
+
+
+function doAPIpostNO(currWDitem) {
+
+     $.ajax({
+        type: "post",
+        url: "oauth.php",
+        dataType:"json",
+        data: {'act':'no','data':currWDitem}
+    })
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+			if(response.status === "good") {
+                console.log('yes');
+				$('#only_logged').html( '<div class="alert alert-success" role="alert">Ok!</div>' );
+            } else if(response.status === "error") {
+                console.log('no');
+				$('#only_logged').html( '<div class="alert alert-warning" role="alert">Radās kļūda!</div>' );
+            }
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+		});
+}
+
+function checkPairs() {
+	$.ajax({
+		type: "GET",
+		url: 'oauth.php',                  //the script to call to get data          
+		data: {'act':'getF'},                        //you can insert url argumnets here to pass to api.php
+		dataType: 'json'                //data format      
+		})
+		.done(function(data1) {          //on recieve of reply
+			console.log('fsfdffsd');
+			console.log(data1);
+			show_text(data1[0][0]);
+			$('#atlikusie').html('Palikuši '+data1[1][0]['count(*)']+' objekti');
+		})
+		.fail(function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log( "Request failed: " + textStatus );
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+});
+}
+//<!--  <div class="col-md-6"><iframe class='fram' id="if1" src="http://www.sports-reference.com/olympics/athletes/au/pierre-aubameyang-1.html"></iframe></div>
+//  <div class="col-md-6"><iframe class='fram' id="if1" //src="http://www.sports-reference.com/olympics/athletes/au/pierre-emerick-aubameyang-1.html"></iframe></div>
+//-->
+
+function clearValues() {
+	$('.removal').val('');
+	$('#curr-complex-input').prop('checked', false);
+}
+
+$(document).ready(function () {
+//show_text(data[0],data[1],data[2],data[3],data[4]);
+checkPairs();
+
+//$("select[name=class_code]>option[value=" + id + "]").attr("selected", "selected");
+
+$('#btn-check').on('click', function(e) {
+	//e.preventDefault();
+	console.log('clicked-check');
+	checkPairs();
+});
+
+$('#btn-ok').on('click', function(e) {
+	var currWDitem = $('#wdq').attr('data-q');
+	var coords = $('#curr-coord-input').val();
+	var ref = $('#curr-ref-input').val();
+	var wd = $('#curr-wd-input').val();
+	var notes = $('#curr-notes-input').val();
+	var isComplex = $('#curr-complex-input').is(':checked');
+	
+	if (isComplex)
+		isComplex = '1';
+		
+		
+	
+	console.log(isComplex);
+	doAPIpost(currWDitem,coords,ref,wd,notes,isComplex);
+	checkPairs();
+	clearValues();
+});
+
+$('#btn-no').on('click', function(e) {
+	var currWDitem = $('#wdq').attr('data-q');
+	doAPIpostNO(currWDitem);
+	checkPairs();
+});
+
+});
+</script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand">WLM</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><span class="navbar-text" id="atlikusie"></span></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<form class="form-inline buttons-group">
+<span href="#" class="btn btn-primary" id='btn-check'>Pārbaudīt citu</span>
+<!--<span href="#" class="btn btn-danger" id='btn-nodob'>No</span>
+<select class="form-control btn btn-danger">
+  <option>1</option>
+  <option>2</option>
+</select>-->
+</form>
+<span id="only_logged"></span>
+<span id="add_status"></span>
+<br>
+<span id="header-info"></span>
+<br>
+<hr />
+
+<form>
+  <div class="row">
+  <div class="col-md-4">
+  <div class="form-group">
+    <label>Koordinātas</label><br>
+    <textarea type="text" id="curr-coord-input" class="removal"></textarea>
+  </div>
+  </div>
+  <div class="col-md-4">
+  <div class="form-group">
+    <label>Atsauce</label><br>
+    <textarea type="text" id="curr-ref-input" class="removal"></textarea>
+  </div>
+  </div>
+  <div class="col-md-4">
+  <div class="form-group">
+    <label>Piezīmes</label><br>
+    <textarea type="text" id="curr-notes-input" class="removal"></textarea>
+  </div>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-md-4">
+  <div class="form-group">
+    <label>Vikidati</label>
+    <input type="text" id="curr-wd-input" class="removal" />
+  </div>
+  </div>
+  <div class="col-md-8">
+  <div class="form-group">
+    <input type="checkbox" id="curr-complex-input" class="removal"> Šie dati ir par KOMPLEKSU ("norādēm"), nevis konkrēto objektu
+  </div>
+  </div>
+  </div>
+</form>
+<!--
+Koordinātas: <textarea type="text" id="curr-coord-input" class="removal"></textarea><br><br>
+Atsauce: <textarea type="text" id="curr-ref-input" class="removal"></textarea><br><br>
+Vikidati: <input type="text" id="curr-wd-input" class="removal" /><br><br>
+Piezīmes: <textarea type="text" id="curr-notes-input" class="removal"></textarea><br>
+<input type="checkbox" id="curr-complex-input" class="removal"> Šie dati ir par KOMPLEKSU ("norādēm"), nevis konkrēto objektu
+-->
+<br>
+<span href="#" class="btn btn-success" id='btn-ok'>OK</span>
+<span href="#" class="btn btn-danger" id='btn-no'>Nevaru atrast!</span>
+</div>
+</body>
+</html>

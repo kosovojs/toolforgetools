@@ -1,0 +1,4 @@
+<?php
+require_once __DIR__.'/api/lib/oauth.php';
+$oauth = new MW_OAuth('edgars','lv','wikipedia');
+?> <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="shortcut icon" href="favicon.ico"><meta http-equiv="X-UA-Compatible" content="ie=edge"><title>Diskusijas</title><link href="dist/css/vendors~main.667427de1e03329cb0d7.css" rel="stylesheet"><link href="dist/css/main.bac4f438f06c56f4ada7.css" rel="stylesheet"></head><body><div id="app"></div><script src="dist/js/vendors~main.b1e8f71bc46de326be56.js"></script><script src="dist/js/main.5694e115ab11528b6dbb.js"></script></body></html>

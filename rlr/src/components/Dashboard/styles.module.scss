@@ -1,0 +1,30 @@
+.wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 2vh;
+	padding-bottom: 7vh;
+	margin-left: 2vw;
+}
+
+.graph1 {
+	max-height: 600px;
+	min-height: 500px;
+	min-width: 49%;
+}
+
+.graph2 {
+	height: 400px;
+	min-width: 95%;
+}
+
+.buttonGroup {
+	float: right;
+}
+
+.activeButton {
+	background-color: #cce5ff !important;
+}
+
+.button {
+	background-color: #d6d8d9 !important;
+}

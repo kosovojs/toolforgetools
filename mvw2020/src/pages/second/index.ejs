@@ -1,0 +1,39 @@
+<% include ./src/partials/head.ejs %>
+<body>
+	<%
+		const active = 'second';
+		const userList = ['Baisulis', 'Biafra', 'Edgars2007', 'Egilus', 'Feens', 'Kleivas', 'Ludis21345', 'Meistars Joda', 'Papuass', 'Pirags', 'ScAvenger', 'Treisijs'];
+		const userCount = 3;
+	%>
+	<div>
+		<%- include ./src/partials/nav.ejs%>
+	</div>
+	<div class="bodyContainer">
+		<%- include ./src/partials/auth_status.ejs%>
+		<h3>2020. gada vērtīgākais dalībnieks Vikipēdijā latviešu valodā</h3>
+		Balsot drīkst par maksimāli trim dalībniekiem!
+		<br />
+		<ul>
+			<% userList.forEach(function(user){ %>
+			<li>
+				<input
+					type="checkbox"
+					class="votingCheckbox"
+					id="<%= 'check'+user %>"
+					name="votingCheckbox"
+					data-user="<%= user %>"
+				/>
+				<label for="<%= 'check'+user %>"><%= user %> </label> (<a
+					href="<%= 'https://lv.wikipedia.org/wiki/Dalībnieks:'+user.replace(/ /g,'_') %>"
+					rel="noopener"
+					target="_blank"
+					>dalībnieklapa</a
+				>)
+			</li>
+			<% }) %>
+		</ul>
+
+		<div id="currentUserCount"></div>
+		<button type="button" class="btn btn-primary" id="voteButton">Balsot!</button>
+	</div>
+</body>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script type="text/javascript" charset="utf8" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/css/jquery.dataTables.min.css">
+<title>Raksti, kas nav latviešu valodas Vikipēdijā, bet ir visvairāk citu valodu Vikipēdijās</title>
+<script>
+function create_wp_link(lang, label) {
+	return '<a href="https://' + lang + '.wikipedia.org/wiki/' + replaceAll(label, ' ', '_') + '">' + label + '</a>'
+}
+
+function create_google_link(label) {
+	return '<a href="https://www.google.com/search?q=' + encodeURIComponent(label) + '">Google</a>'
+}
+
+function replaceAll(str, find, replace) {
+	return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_wd_link(href) {
+	return '<a href="https://www.wikidata.org/wiki/' + href + '">' + href + '</a>';
+}
+
+function updateLabel() {
+$.ajax({
+	type: "get",
+	url: "api.php",
+	dataType:"json"
+})
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+		var bigtable = create_table(response);
+		$('#bigtable').html(bigtable);
+		$('#datatable1').DataTable({
+			"order": [
+				[3, "desc"]
+			],
+			"fixedHeader": true,
+			"aoColumns": [
+				null,
+				null,
+				null,
+				{
+					"orderSequence": ["desc", "asc"]
+				},
+				null
+			],
+			"lengthMenu": [
+				[50, 100, 500, 1000, -1],
+				[50, 100, 500, 1000, "All"]
+			],
+			columnDefs: [{
+				targets: [3],
+				orderData: [3, 0]
+			}]
+		});
+			
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest['responseText']);
+		});
+}
+//
+
+function create_table(data) {
+	var header = ['Latviski', 'Citā valodā', 'Apraksts', 'Starpviki saites', 'Vikidati'];
+	var aaa = [];
+	//var start = datarange[0];
+	//var end = datarange[1];
+
+	aaa.push('<table class="table" id="datatable1"><thead><tr>');
+	for (i = 0; i < header.length; i++) {
+		if (header[i] == 'desc') {
+			aaa.push('<th width=40%>' + header[i] + '</th>');
+		} else {
+			aaa.push('<th>' + header[i] + '</th>');
+		}
+	}
+	aaa.push('</tr></thead><tbody>');
+
+	for (i = 0; i < data.length; i++) {
+		//for (var key in data) {
+		//lv, orig, lang, iws, wd, descr
+		lv = data[i][0];
+		orig = data[i][1];
+		orig_lang = data[i][2];
+		//if(orig=='Watermelon')
+		//	console.log(lv);
+
+		iws = data[i][3];
+		wd = data[i][4];
+		desc = data[i][5];
+		if (lv == "") {
+			lv = create_wp_link(orig_lang, orig) + ' <small>(nav iztulkots latviski)</small>';
+		} else {
+			lv1 = lv.split("|");
+			var lvs = [];
+			for (a = 0; a < lv1.length; a++) {
+				lvs.push(create_wp_link('lv', lv1[a]) + ' <small>('+create_google_link(lv1[a])+')</small>');
+			}
+			//https://stackoverflow.com/questions/16251822/array-to-comma-separated-string-and-for-last-tag-use-the-and-instead-of-comma
+			lv = lvs.join(', ');
+		}
+
+		if (desc == null) {
+			desc = '';
+		}
+
+		var thisrow = ['<td>' + lv + '</td>',
+			'<td>' + create_wp_link(orig_lang, orig) + ' <small>('+create_google_link(orig)+')</small></td>',
+			'<td>' + desc + '</td>',
+			'<td>' + iws + '</td>',
+			'<td>' + create_wd_link(wd) + '</td>'
+		];
+
+		aaa.push(thisrow.join(''));
+		aaa.push('</tr>');
+	}
+
+	return res = aaa.join("\n") + '</tbody></table>';
+}
+$(document).ready(function() {
+	$(document).ajaxStart(function() {
+		$('#loadingmessage').show();
+	});
+	$(document).ajaxStop(function() {
+		$('#loadingmessage').hide();
+	});
+
+	updateLabel();
+	/*
+	$(document).on('click', '.edit', function(){
+    console.log('dfsdfsdf');
+    console.log($(this).data("wd"));
+});
+*/
+
+});
+</script>
+</head>
+<body>
+<div id="bigtable"></div>
+<div id='loadingmessage' style='display:none'>
+<div class="alert alert-warning" role="alert">  Uzgaidi brīdi, tiek ielādēti dati!</div>
+</div>
+</body>
+</html>

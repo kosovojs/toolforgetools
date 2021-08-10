@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WLM Latvia</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.css"></link>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/Leaflet.EasyButton/2.3.0/easy-button.min.css">
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/Leaflet.EasyButton/2.3.0/easy-button.min.js"></script>
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet-locatecontrol/0.62.0/L.Control.Locate.min.css" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/leaflet-locatecontrol/0.62.0/L.Control.Locate.min.js" charset="utf-8"></script>
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/proj4js/2.4.4/proj4-src.js"></script>
+
+<style>
+html, body, #container {
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+#map {
+  height: 100%;
+  width: auto;
+}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">WLM</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="all.html">Visi objekti</a></li>
+        <li><a href="choropleth.html">Bilžu sadalījums</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div id="container">
+<div id="map"></div>
+</div>
+<script>
+//
+proj4.defs('WGS84', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
+proj4.defs('LKS', "+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs");
+
+function escattr ( s ) {
+	return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;') ;
+}
+//decodeURIComponent(
+function createImageThumbnail ( image,size ) {
+	image = image.replace("http://commons.wikimedia.org/wiki/Special:FilePath/",  "");
+	var url = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+image+'?width='+size+'px&height='+size+'px' ;
+		var h = '' ;
+		h += "<div class='thumb'>" ;
+		h += "<a target='_blank' href='https://commons.wikimedia.org/wiki/File:" + image + "'>" ;
+		h += "<img src='" + url + "' border=0 width='"+size+"px' height='"+size+"px' alt='Loading image...' />" ;
+		h += "</a></div>" ;
+		h += "<span class='smallimgname'>" + decodeURIComponent(image) + "</span>" ;
+		return h ;
+}
+
+function create_upload_link(id,desc,lat,lng,cats) {
+	//https://commons.wikimedia.org/w/index.php?title=Special:UploadWizard&id={}&description={}&lat={}&lon={}&categories={}&descriptionlang=lv&campaign=wle-lv
+	var url = 'https://commons.wikimedia.org/w/index.php?title=Special:UploadWizard&id=';
+	url += id+'&description='+encodeURIComponent(desc)+'&lat='+lat+'&lon='+lng+'&categories='+encodeURIComponent(cats);
+	url += '&descriptionlang=lv&campaign=wlm-lv';
+	
+	return url;
+}
+
+regions = {
+	'LV-001':'Aglona Municipality',
+	'LV-002':'Aizkraukle Municipality',
+	'LV-003':'Aizpute Municipality',
+	'LV-004':'Aknīste Municipality',
+	'LV-005':'Aloja Municipality',
+	'LV-006':'Alsunga Municipality',
+	'LV-007':'Alūksne Municipality',
+	'LV-008':'Amata Municipality',
+	'LV-009':'Ape Municipality',
+	'LV-010':'Auce Municipality',
+	'LV-011':'Ādaži Municipality',
+	'LV-012':'Babīte Municipality',
+	'LV-013':'Baldone Municipality',
+	'LV-014':'Baltinava Municipality',
+	'LV-015':'Balvi Municipality',
+	'LV-016':'Bauska Municipality',
+	'LV-017':'Beverīna Municipality',
+	'LV-018':'Brocēni Municipality',
+	'LV-019':'Burtnieki Municipality',
+	'LV-020':'Carnikava Municipality',
+	'LV-021':'Cesvaine Municipality',
+	'LV-022':'Cēsis Municipality',
+	'LV-023':'Cibla Municipality',
+	'LV-024':'Dagda Municipality',
+	'LV-025':'Daugavpils Municipality',
+	'LV-026':'Dobele Municipality',
+	'LV-027':'Dundaga Municipality',
+	'LV-028':'Durbe Municipality',
+	'LV-029':'Engure Municipality',
+	'LV-030':'Ērgļi Municipality',
+	'LV-031':'Garkalne Municipality',
+	'LV-032':'Grobiņa Municipality',
+	'LV-033':'Gulbene Municipality',
+	'LV-034':'Iecava Municipality',
+	'LV-035':'Ikšķile Municipality',
+	'LV-036':'Ilūkste Municipality',
+	'LV-037':'Inčukalns Municipality',
+	'LV-038':'Jaunjelgava Municipality',
+	'LV-039':'Jaunpiebalga Municipality',
+	'LV-040':'Jaunpils Municipality',
+	'LV-041':'Jelgava Municipality',
+	'LV-042':'Jēkabpils Municipality',
+	'LV-043':'Kandava Municipality',
+	'LV-044':'Kārsava Municipality',
+	'LV-045':'Kocēni Municipality',
+	'LV-046':'Koknese Municipality',
+	'LV-047':'Krāslava Municipality',
+	'LV-048':'Krimulda Municipality',
+	'LV-049':'Krustpils Municipality',
+	'LV-050':'Kuldīga Municipality',
+	'LV-051':'Ķegums Municipality',
+	'LV-052':'Ķekava Municipality',
+	'LV-053':'Lielvārde Municipality',
+	'LV-054':'Limbaži Municipality',
+	'LV-055':'Līgatne Municipality',
+	'LV-056':'Līvāni Municipality',
+	'LV-057':'Lubāna Municipality',
+	'LV-058':'Ludza Municipality',
+	'LV-059':'Madona Municipality',
+	'LV-060':'Mazsalaca Municipality',
+	'LV-061':'Mālpils Municipality',
+	'LV-062':'Mārupe Municipality',
+	'LV-063':'Mērsrags Municipality',
+	'LV-064':'Naukšēni Municipality',
+	'LV-065':'Nereta Municipality',
+	'LV-066':'Nīca Municipality',
+	'LV-067':'Ogre Municipality',
+	'LV-068':'Olaine Municipality',
+	'LV-069':'Ozolnieki Municipality',
+	'LV-070':'Pārgauja Municipality',
+	'LV-071':'Pāvilosta Municipality',
+	'LV-072':'Pļaviņas Municipality',
+	'LV-073':'Preiļi Municipality',
+	'LV-074':'Priekule Municipality',
+	'LV-075':'Priekuļi Municipality',
+	'LV-076':'Rauna Municipality',
+	'LV-077':'Rēzekne Municipality',
+	'LV-078':'Riebiņi Municipality',
+	'LV-079':'Roja Municipality',
+	'LV-080':'Ropaži Municipality',
+	'LV-081':'Rucava Municipality',
+	'LV-082':'Rugāji Municipality',
+	'LV-083':'Rundāle Municipality',
+	'LV-084':'Rūjiena Municipality',
+	'LV-085':'Sala Municipality',
+	'LV-086':'Salacgrīva Municipality',
+	'LV-087':'Salaspils Municipality',
+	'LV-088':'Saldus Municipality',
+	'LV-089':'Saulkrasti Municipality',
+	'LV-090':'Sēja Municipality',
+	'LV-091':'Sigulda Municipality',
+	'LV-092':'Skrīveri Municipality',
+	'LV-093':'Skrunda Municipality',
+	'LV-094':'Smiltene Municipality',
+	'LV-095':'Stopiņi Municipality',
+	'LV-096':'Strenči Municipality',
+	'LV-097':'Talsi Municipality',
+	'LV-098':'Tērvete Municipality',
+	'LV-099':'Tukums Municipality',
+	'LV-100':'Vaiņode Municipality',
+	'LV-101':'Valka Municipality',
+	'LV-102':'Varakļāni Municipality',
+	'LV-103':'Vārkava Municipality',
+	'LV-104':'Vecpiebalga Municipality',
+	'LV-105':'Vecumnieki Municipality',
+	'LV-106':'Ventspils Municipality',
+	'LV-107':'Viesīte Municipality',
+	'LV-108':'Viļaka Municipality',
+	'LV-109':'Viļāni Municipality',
+	'LV-110':'Zilupe Municipality',
+	'LV-DGV':'Daugavpils',
+	'LV-JEL':'Jelgava',
+	'LV-JKB':'Jēkabpils',
+	'LV-JUR':'Jūrmala',
+	'LV-LPX':'Liepāja',
+	'LV-REZ':'Rēzekne',
+	'LV-RIX':'Riga',
+	'LV-VMR':'Valmiera',
+	'LV-VEN':'Ventspils'
+}
+
+function monumentCategory(regionCode) {
+	if (regions.hasOwnProperty(regionCode)) {
+		return 'Cultural heritage monuments in ' + regions[regionCode];
+	} else {
+		return 'Cultural heritage monuments in Latvia';
+	}
+}
+
+function create_popup(data,lat,lng) {
+	//["item","itemLabel","coords","image","comcat","web","sitelink","sastavno1"]
+	//vēl vajag tipu!!!
+	var aaa = [];
+	//console.log(data);
+	
+	var lks = proj4('WGS84','LKS',[parseFloat(lng),parseFloat(lat)]);
+	
+	aaa.push('<b>' +data.itemLabel.value + '</b>');
+	
+	if (data.image)
+		aaa.push(createImageThumbnail ( data.image.value,'200' ));
+	
+	if (data.address)
+		aaa.push('Adrese: '+data.address.value);
+	
+	if (data.locality)
+		aaa.push('Norādes: '+data.locality.value);
+	
+	if (data.sitelink)
+		aaa.push('<img src="wiki.png" width=15px /> <a href="'+data.sitelink.value+'">Raksts Vikipēdijā</a>');
+	
+	if (data.sastavno1)
+		aaa.push('Galvenais objekts: <a href="'+data.sastavno1.value+'">'+decodeURIComponent(data.sastavno1.value.replace('https://lv.wikipedia.org/wiki/',''))+'</a>');
+	
+	aaa.push('<img src="wdata.png" width=15px /> <a href="'+data.item.value+'">Vikidatu vienums</a>');
+	aaa.push('<a href="http://mantojums.lv/lv/piemineklu-saraksts/'+data.ID.value+'/">Objekts NKMP mājaslapā</a>');
+	
+	aaa.push('Skatīt objektu: <a href="https://www.google.com/maps/@'+lat+','+lng+',15.25z">Google Maps</a> | <a href="http://balticmaps.eu/?lang=lv&centerx='+lks[0]+'&centery='+lks[1]+'&zoom=4">Balticmaps</a>');
+	
+	var iadt = '';
+	
+	if (data.ID)
+		iadt = data.ID.value;
+	
+	//c:Category:High-resolution_or_SVG_official_Wikimedia_logos
+	if (data.comcat) {
+		aaa.push('<img src="commons.png" width=12px /> <a href="https://commons.wikimedia.org/wiki/Category:'+encodeURIComponent(data.comcat.value)+'">Attēlu galerija</a>');
+		aaa.push('<span class="fa fa-image"></span> <a href="'+create_upload_link(iadt,data.itemLabel.value,lat,lng,data.comcat.value)+'">Augšupielādēt vēl attēlus</a>');
+	} else if (data.regioncode) {
+		aaa.push('<span class="fa fa-image"></span> <a href="'+create_upload_link(iadt,data.itemLabel.value,lat,lng,monumentCategory(data.regioncode.value))+'">Augšupielādēt attēlus</a>');
+	} else {
+		aaa.push('<span class="fa fa-image"></span> <a href="'+create_upload_link(iadt,data.itemLabel.value,lat,lng,'Cultural heritage monuments in Latvia')+'">Augšupielādēt attēlus</a>');
+	}
+	
+	if (data.web)
+		aaa.push('<a href="'+data.web.value+'">Mājaslapa</a>');
+	//
+	return aaa.join('<br>');
+}
+//
+
+/*select ?item ?itemLabel ?coords ?image ?comcat ?web ?sitelink ?sastavno1 ?iadt {
+  ?item wdt:P17 wd:Q211 .
+  values ?itemtype {wd:Q11876497 wd:Q28055306 wd:Q28055278 wd:Q28054706 wd:Q28055269 wd:Q29549240 }
+  ?item wdt:P31 ?itemtype;
+        wdt:P625 ?coords .
+  optional { ?item wdt:P18 ?image }
+  optional { ?item wdt:P373 ?comcat }
+  optional { ?item wdt:P856 ?web }
+  optional { ?item wdt:P4029 ?iadt }
+  optional { ?item wdt:P527 ?sastavno. ?sastavno1 schema:about ?sastavno; schema:isPartOf <https://lv.wikipedia.org/> }
+  
+  optional {?sitelink schema:about ?item; schema:isPartOf <https://lv.wikipedia.org/>}
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "lv,en". }
+}
+*/
+$.getJSON('https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=%23WLM%20Latvia-2018%0Aselect%20%3Fitem%20%3FitemLabel%20%3Fcoords%20%3Fimage%20%3Fcomcat%20%3Fweb%20%3Fsitelink%20%3Fsastavno1%20%3FID%20%3Faddress%20%3Flocality%20%3Fregioncode%20%7B%0A%20%20%3Fitem%20wdt%3AP17%20wd%3AQ211%20.%0A%20%20%3Fitem%20wdt%3AP2494%20%3FID%3B%0A%20%20%20%20%20%20%20%20wdt%3AP625%20%3Fcoords%20.%0A%20%20filter%20not%20exists%20%7B%3Fitem%20wdt%3AP31%20wd%3AQ12672672%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP18%20%3Fimage%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP373%20%3Fcomcat%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP856%20%3Fweb%20%7D%0A%20%20optional%20%7B%20%3Fitem%20wdt%3AP856%20%3Fweb%20%7D%0A%20%20OPTIONAL%20%7B%20%3Fitem%20wdt%3AP969%20%3Faddress%20%7D%0A%20%20OPTIONAL%20%7B%20%3Fitem%20wdt%3AP2795%20%3Flocality%7D%0A%20%20%3Fitem%20wdt%3AP2817%2Fwdt%3AP131*%2Fwdt%3AP300%20%3Fregioncode%20.%0A%20%20%23optional%20%7B%20%3Fitem%20wdt%3AP527%20%3Fsastavno.%20%3Fsastavno1%20schema%3Aabout%20%3Fsastavno%3B%20schema%3AisPartOf%20%3Chttps%3A%2F%2Flv.wikipedia.org%2F%3E%20%7D%0A%20%20%0A%20%20optional%20%7B%3Fsitelink%20schema%3Aabout%20%3Fitem%3B%20schema%3AisPartOf%20%3Chttps%3A%2F%2Flv.wikipedia.org%2F%3E%7D%0A%20%20SERVICE%20wikibase%3Alabel%20%7B%20bd%3AserviceParam%20wikibase%3Alanguage%20%22lv%2Cen%22.%20%7D%0A%7D&format=json', function (list) {
+	
+
+//$.getJSON('query(2).json', function(list) {
+	var one = L.layerGroup();
+	var two = L.layerGroup();
+	
+	var stats = {
+		"totalCount": 0,
+		"imageCount": 0
+	};
+	var color = ['red', 'yellow', 'green'];
+	var pointlayers = ['one', 'two', 'three'];
+	for (var i = 0; i < list.results.bindings.length; i++) {
+		var colorNumber = 0;
+		var popupContent = "<b>" + list.results.bindings[i].itemLabel.value + "</b>";
+		stats["totalCount"]++;
+		if (list.results.bindings[i].image) {
+			stats["imageCount"]++;
+			colorNumber++;
+			addTogroup = one;
+		} else {
+			addTogroup = two;
+		}
+		
+		
+		if (list.results.bindings[i].coords) {
+			stats["coordinateCount"]++;
+			var coordText = list.results.bindings[i].coords.value.split('(');
+			var latlngText = coordText[1].split(' ');
+			var lng = latlngText[0];
+			var lngText = latlngText[1];
+			var lat = lngText.substring(0, lngText.length - 1);
+			var latlng = L.latLng(lat, lng);
+			
+			popupContent = create_popup(list.results.bindings[i],lat,lng);
+			
+			var marker = L.circleMarker(latlng, {
+				radius: 7.5,
+				color: 'black',
+				fillOpacity: 1,
+				fillColor: color[colorNumber]
+			}).bindPopup(popupContent).addTo(addTogroup);
+		}
+	}
+	
+	
+	
+
+	/*
+	L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.').addTo(one),
+	L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.').addTo(one),
+	L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.').addTo(one),
+	L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.').addTo(one);
+	*/
+	
+	var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+		'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+		'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		mbUrl = 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+		
+	var grayscale = L.tileLayer(mbUrl, {
+			id: 'mapbox.light',
+			attribution: mbAttr
+		}),
+		streets = L.tileLayer(mbUrl, {
+			id: 'mapbox.streets',
+			attribution: mbAttr
+		}),
+		satellite = L.tileLayer(mbUrl, {
+			id: 'mapbox.streets-satellite',
+			attribution: mbAttr
+		});
+
+	var map = L.map('map', {
+		center: [56.761756, 24.5434],
+		zoom: 8,
+		layers: [streets, one, two]
+	});
+
+	/*
+	var baseLayers = {
+		"Melnbaltā": grayscale,
+		"Krāsainā": streets,
+		"Satelīts": satellite
+	};
+	*/
+	var overlays = {
+		'<span style="display:inline-block; width:1.5em; height:1em; margin:1px 0; border:1px solid black; background-color:yellow;"></span> Ir attēls': one,
+		'<span style="display:inline-block; width:1.5em; height:1em; margin:1px 0; border:1px solid black; background-color:red;"></span> Nav attēla': two
+	};
+	L.control.layers({}, overlays).addTo(map);
+	//L.control.layers(baseLayers, overlays).addTo(map);
+
+L.easyButton('<i class="fa fa-map-marker" aria-hidden="true"></i>', function(btn, map){
+  map.locate({setView: true, maxZoom: 13});
+}).addTo(map);
+
+map.on('locationfound', function (event) {
+    var Test = L.marker([event.latitude, event.longitude]).bindPopup('I\'m here :)').addTo(map);
+	//L.popup().setContent("Your Location").setLatLng(event.latlng).addTo(map);
+});
+	
+function my_loc() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        x.innerHTML = "Geolocation is not supported by this browser.";
+    }
+}
+
+
+function showPosition(position) {
+	L.circleMarker([position.coords.latitude, position.coords.longitude], {
+				radius: 5,
+				color: 'pink',
+				fillOpacity: 1,
+				fillColor: 'pink'
+			}).bindPopup('my hauz').addTo(map)
+}
+	
+//my_loc();
+});
+</script>
+</body>
+</html>

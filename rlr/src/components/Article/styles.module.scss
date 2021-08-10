@@ -1,0 +1,51 @@
+.mainFlexContainer {
+	display: flex;
+}
+
+.articleTextContainer {
+	min-width: 78vw;
+}
+
+.infoFlexContainer {
+	display: flex;
+	flex-direction: column;
+	min-width: 20%;
+	max-width: 20%;
+	min-height: 100vh;
+	border-right: 3px solid #ddd;
+}
+
+.textFlexContainer {
+	display: flex;
+	flex-direction: column;
+}
+
+.title {
+	padding-left: 15px;
+	padding-top: 15px;
+}
+
+.articleName {
+	font-size: 155%;
+}
+
+.text {
+	padding-left: 15px;
+}
+
+.navigActions {
+	padding: 15px 10px 10px 7px;
+	grid-column: 1;
+	grid-row: 1;
+}
+
+.info {
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+.articleActions {
+	padding: 15px 10px 10px 7px;
+	display: flex;
+	justify-content: center;
+}

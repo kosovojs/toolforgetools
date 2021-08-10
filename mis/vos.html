@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>VOS2020</title>
+		<link
+		  rel="stylesheet"
+		  type="text/css"
+		  href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+		/>
+		<style>
+			#articleList {
+				column-count: 5;
+			}
+
+			#country_list {
+				column-count: 5;
+			}
+
+			#articleList_female {
+				column-count: 5;
+			}
+
+			.section {
+				column-count: 5;
+			}
+
+			.main_cnt {
+				padding-left: 25px;
+				padding-right: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="main_cnt">
+			<h3>Visas valodas</h3>
+			<div id="articleList" style="padding-top: 15px;"></div>
+			<h3>Valstu uzskaitījumi</h3>
+			<div id="country_list" style="padding-top: 15px;"></div>
+			<h3>female</h3>
+			<div id="articleList_female" style="padding-top: 15px;"></div>
+
+			<h3>Pēc enwiki kategorijas</h3>
+			<div id="en_by_cat" style="padding-top: 15px;"></div>
+		</div>
+
+		<script>
+			fetch('https://edgars.toolforge.org/mis/api.php?act=vos2020&val=allwikis').then(resp => resp.json()).then(resp => {
+				const{data} = resp;
+
+				const results = Object.keys(data).map(wd => {
+					const {label, label_lang, iw_count, image} = data[wd];
+
+					return {
+						article: label, iws: iw_count, lang: label_lang, image, repr: `<li><a href="https://${label_lang.replace('wiki', '')}.wikipedia.org/wiki/${encodeURIComponent(label)}" target="_blank">${label}</a> — ${iw_count}</li>`
+					}
+				}).sort((a, b) => (a.iws > b.iws) ? -1 : ((b.iws > a.iws) ? 1 : 0)).slice(0, 300);
+
+				document.getElementById('articleList').innerHTML=`<ul>${results.map(e=>e.repr).join('')}</ul>`
+
+				const results1 = Object.keys(data).map(wd => {
+					const {label, label_lang, iw_count, image, gender} = data[wd];
+
+
+					return {
+						article: label, gender, iws: iw_count, lang: label_lang, image, repr: `<li><a href="https://${label_lang.replace('wiki', '')}.wikipedia.org/wiki/${encodeURIComponent(label)}" target="_blank">${label}</a> — ${iw_count}</li>`
+					}
+				}).sort((a, b) => (a.iws > b.iws) ? -1 : ((b.iws > a.iws) ? 1 : 0)).filter(entry => {
+					const {gender} = entry;
+
+					if (!gender || gender.len < 1 || gender[0] === null) {
+						return false;
+					}
+
+					if (gender[0] === 'Q6581097') {
+						return false;
+					}
+					return true;
+				}).slice(0, 300);
+
+				document.getElementById('articleList_female').innerHTML=`<ul>${results1.map(e=>e.repr).join('')}</ul>`
+			})
+
+			fetch('https://edgars.toolforge.org/mis/api.php?act=vos2020_countries').then(resp => resp.json()).then(resp => {
+				const{data} = resp;
+
+				const results = data.map(entry => {
+					const [article, iws] = entry;
+
+					return {
+						iws, repr: `<li><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(article)}" target="_blank">${article}</a> — ${iws}</li>`
+					}
+				}).sort((a, b) => (a.iws > b.iws) ? -1 : ((b.iws > a.iws) ? 1 : 0)).slice(0, 300);
+
+				document.getElementById('country_list').innerHTML=`<ul>${results.map(e=>e.repr).join('')}</ul>`
+			})
+
+			fetch('https://edgars.toolforge.org/mis/api.php?act=vos2020&val=en_sub').then(resp => resp.json()).then(resp => {
+				const{data} = resp;
+
+				const parts = [];
+
+				Object.keys(data).map(category => {
+
+					const results = Object.keys(data[category]).map(wd => {
+						const {label, label_lang, iw_count, image} = data[category][wd];
+
+						return {
+							article: label, iws: iw_count, lang: label_lang, image, repr: `<li><a href="https://${label_lang.replace('wiki', '')}.wikipedia.org/wiki/${encodeURIComponent(label)}" target="_blank">${label}</a> — ${iw_count}</li>`
+						}
+					}).sort((a, b) => (a.iws > b.iws) ? -1 : ((b.iws > a.iws) ? 1 : 0)).slice(0, 70);
+
+					parts.push(`<h3>${category}</h3><div class="section"><ul>${results.map(e=>e.repr).join('')}</ul></div>`)
+
+				});
+				document.getElementById('en_by_cat').innerHTML=`<ul>${parts.join('')}</ul>`
+			})
+		</script>
+	</body>
+
+</html>

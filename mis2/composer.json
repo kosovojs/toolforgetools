@@ -1,0 +1,17 @@
+{
+    "name": "user/missing-php",
+    "authors": [
+        {
+            "name": "edgarskos",
+            "email": "kosovojs@gmail.com"
+        }
+    ],
+	"require": {
+        "websitebeaver/simple-mysqli": "^1.5"
+    },
+    "autoload": {
+      "psr-4": {
+            "Missing\\": "app/"
+      }
+    }
+}

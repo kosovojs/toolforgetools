@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+	<title>100 tūkstošu sasniegšana</title>
+<meta charset="utf-8" />
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+	<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+<body>
+<h3>Lai uz Latvijas simtgadi sasniegtu 100 tūkstošus rakstu, vienā dienā jāuzraksta</h3>
+		<div style="width:75%;"><canvas id="canvas"  width="400" height="175"></canvas></div>
+	<script>
+	
+function generate(articlecount,days) {
+	var ctx = $("#canvas");
+	
+	var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: days,
+        datasets: [{
+			backgroundColor: 'rgb(255, 99, 132)',
+			borderColor: 'rgb(255, 99, 132)',
+            label: 'Dienā rakstāmo rakstu skaits',
+            data: articlecount,
+			fill: false
+        }]
+    },
+    options: {
+				responsive: true,
+				tooltips: {
+					mode: 'index',
+					intersect: false,
+				},
+				scales: {
+					xAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Laika brīdis'
+						}
+					}],
+					yAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Rakstu skaits'
+						}
+					}]
+				}
+		
+		
+    }
+});
+}
+
+    $.ajax({
+        type: 'GET',
+        url: 'api.php',
+        data: {'action' : 'graphdata'}
+   })
+   .done(function(data){
+		console.log(data);
+		
+		generate(data[0],data[1]);
+    });
+	</script>
+</body>
+
+</html>

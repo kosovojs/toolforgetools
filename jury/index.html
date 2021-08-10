@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>2018. gada FIFA Pasaules kauss</title>
+<meta charset="utf-8" />
+<style>
+.list-group-horizontal .list-group-item {
+    display: inline-block;
+}
+.list-group-horizontal .list-group-item {
+    margin-bottom: 0;
+    margin-left:-4px;
+    margin-right: 0;
+    border-right-width: 0;
+}
+.list-group-horizontal .list-group-item:first-child {
+    border-top-right-radius:0;
+    border-bottom-left-radius:4px;
+}
+.list-group-horizontal .list-group-item:last-child {
+    border-top-right-radius:4px;
+    border-bottom-left-radius:0;
+    border-right-width: 1px;
+}
+</style>
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script type="text/javascript" charset="utf8" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/css/jquery.dataTables.min.css">
+<script src="common.js"></script>
+<script type="text/javascript" charset="utf8" src="modal.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="">FIFA 2018</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="new.html">Jauns raksts</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<h3>2018. gada FIFA Pasaules kausa konkurss Vikipēdijā latviešu valodā!</h3>
+<br>
+<span id="stats"></span>
+
+<table class="table table-striped" id="exampleTable">
+    <thead> 
+        <tr>
+            <th width="40%">Dalībnieks</th>
+            <th>Raksti</th>
+            <th>Punktu skaits</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+    
+<div style="display:none">    
+    <table class="table table-striped" id="detailsTable">
+        <thead> 
+            <tr>
+                <th width="40%">Nosaukums</th>
+                <th width="20%">Pievienots</th>
+                <th width="8%">Izveide</th>
+                <th width="8%">Apjoms</th>
+                <th width="8%">Attēli</th>
+                <th width="8%">Vikidati</th>
+                <th width="8%">Kopā</th>
+                <th>Darbības</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+</div>
+<div id="idMyModal"></div>
+<script>
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_lv_link(href,label) {
+	return '<a target="_blank" href="https://lv.wikipedia.org/wiki/'+replaceAll(href, ' ', '_')+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+//http://jsfiddle.net/headwinds/zz3cH/
+function fnFormatDetails(table_id, html) {
+    var sOut = "<table id=\"exampleTable_" + table_id + "\">";
+    sOut += html;
+    sOut += "</table>";
+    return sOut;
+}
+
+function add_tables(finalmas) {
+	var iTableCounter = 1;
+		var oTable;
+		var oInnerTable;
+		var detailsTableHtml;
+
+		//Run On HTML Build
+		$(document).ready(function () {
+			
+			// you would probably be using templates here
+			detailsTableHtml = $("#detailsTable").html();
+
+			//Insert a 'details' column to the table
+			var nCloneTh = document.createElement('th');
+			var nCloneTd = document.createElement('td');
+			nCloneTd.innerHTML = '<span class="glyphicon glyphicon-plus"></span>';
+			nCloneTd.className = "center";
+
+			$('#exampleTable thead tr').each(function () {
+				this.insertBefore(nCloneTh, this.childNodes[0]);
+			});
+
+			$('#exampleTable tbody tr').each(function () {
+				this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
+			});
+			
+		   
+			//Initialse DataTables, with no sorting on the 'details' column
+			var oTable = $('#exampleTable').dataTable({
+				//"bJQueryUI": true,
+				"aaData": finalmas,
+				 "columnDefs": [
+            {
+                // The `data` parameter refers to the data for the cell (defined by the
+                // `data` option, which defaults to the column being worked with, in
+                // this case `data: 0`.
+                "render": function ( data ) {
+                    if (data=='Edgars2007') {
+						return create_lv_link('Dalībnieks:'+data,data) + ' <small>(organizators; konkursā nepiedalās)</small>';
+					} else {
+						return create_lv_link('Dalībnieks:'+data,data);
+					}
+					
+                },
+                "targets": 1
+            }
+				],
+				"bPaginate": false,
+				"aoColumns": [
+					{
+					   "mDataProp": null,
+					   "sClass": "control center",
+					   "sDefaultContent": '<span class="glyphicon glyphicon-plus"></span>'
+					},
+					//user:name, points:thisdata["meta"][0], articles
+					{ "mDataProp": "user" },
+					{ "mDataProp": "articles" },
+					{ "mDataProp": "points" }
+				],
+				"aaSorting": [[3, 'desc']]
+			});
+
+			/* Add event listener for opening and closing details
+			* Note that the indicator for showing which row is open is not controlled by DataTables,
+			* rather it is done here
+			*/
+			$('#exampleTable tbody td span').on('click', function () {
+				var nTr = $(this).parents('tr')[0];
+				var nTds = this;
+				
+				if (oTable.fnIsOpen(nTr)) {
+					/* This row is already open - close it */
+					$(this).removeClass('glyphicon-minus').addClass('glyphicon-plus');
+					oTable.fnClose(nTr);
+				}
+				else {
+					/* Open this row */
+					var rowIndex = oTable.fnGetPosition( $(nTds).closest('tr')[0] ); 
+					var detailsRowData = finalmas[rowIndex].details;
+				   
+				   $(this).removeClass('glyphicon-plus').addClass('glyphicon-minus');
+					//$(this).html('<span class="glyphicon glyphicon-minus"></span>');
+					oTable.fnOpen(nTr, fnFormatDetails(iTableCounter, detailsTableHtml), 'details');
+					oInnerTable = $("#exampleTable_" + iTableCounter).dataTable({
+						"bJQueryUI": true,
+						//"bFilter": false,
+						"aaData": detailsRowData,
+						
+						//"bSort" : true, // disables sorting
+						"aoColumns": [
+						//{"title":"blah","added":"2018-06-03 16:54:24","new":"1","size":"3","images":"0","wikidata":"1"}
+						{ "mDataProp": "title" },
+						{ "mDataProp": "added" },
+						{ "mDataProp": "new" },
+						{ "mDataProp": "size" },
+						{ "mDataProp": "images" },
+						{ "mDataProp": "wikidata" },
+						{ "mDataProp": "sum" },
+						{ "mDataProp": null }
+					],
+				 "columnDefs": [
+            {
+                "render": function ( data ) {
+                    return create_lv_link(data,data);
+                },
+                "targets": 0
+            },{
+                "render": function ( data,row ) {
+                   console.log(data);
+                   console.log(row);
+				   return '<button class="btn btn-success btn-edit" data-id="'+data.id+'">Labot!</button>'
+					
+                },
+                "targets": -1
+            }
+				],
+						"aaSorting": [[6, 'desc']],
+						"bPaginate": false
+					});
+					iTableCounter = iTableCounter + 1;
+				}
+			});
+
+
+		});
+}
+
+
+$(document).on('click', '.btn-edit', function(){
+	main_action($(this).data('id'));
+	console.log($(this).data('id'));
+
+});
+
+
+$.ajax({
+        type: "get",
+        url: "../oauth.php",
+        dataType:"json",
+        data: {'action':'main_jury'},
+    })
+	.done(function (response) {
+		//console.log('ok');
+		//console.log(response);
+		var statistics = {'users':0,'articles':0};
+		
+		var finalmas1 = [];
+
+		for (name in response) {
+			
+			var thisdata = response[name];
+			
+			var mainrow = { user:name, points:thisdata["meta"][0], articles:thisdata["meta"][1], details: thisdata["articles"]};
+			statistics['articles'] += thisdata["meta"][1];
+			statistics['users'] += 1;
+			finalmas1.push(mainrow);
+		}
+		
+	add_tables(finalmas1);
+	$('#stats').html('<div class="list-group-horizontal"><span class="list-group-item"><big>'+statistics['articles']+'</big> raksti</span><span class="list-group-item"><big>'+statistics['users']+'</big> dalībnieki</span></div>')
+	
+}).fail(function (jqXHR, textStatus) {
+    console.log(textStatus);
+});
+</script>
+</body>
+</html>

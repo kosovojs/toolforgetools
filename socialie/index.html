@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="common.js"></script>
+<!--<link rel="stylesheet" type="text/css" href="wikitables.css">-->
+<title>Sociālie tīkli</title>
+<meta charset="utf-8" />
+<script>
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_link(site,href,label) {
+	if (site=='d') {
+		return '<a target="_blank" id="wdq" data-q="'+href+'" href="https://www.wikidata.org/wiki/'+href+'">'+label+'</a>'
+	}
+	else if (site=='g') {
+		return '<a target="_blank" href="https://www.google.com/search?q='+encodeURI(href)+'+-site:mantojums.lv+-site:wikipedia.org">'+label+'</a>'
+	}
+}
+
+function createImageThumbnail ( image,size ) {
+	image = image.replace("http://commons.wikimedia.org/wiki/Special:FilePath/",  "");
+	var url = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+image+'?width='+size+'px&height='+size+'px' ;
+		var h = '' ;
+		h += "<div class='thumb'>" ;
+		h += "<a target='_blank' href='https://commons.wikimedia.org/wiki/File:" + image + "'>" ;
+		h += "<img src='" + url + "' border=0 width='"+size+"px' height='"+size+"px' alt='Loading image...' />" ;
+		h += "</a></div>" ;
+		//h += "<span class='smallimgname'>" + decodeURIComponent(image) + "</span>" ;
+		return h ;
+}
+
+function create_lv_link(href,label) {
+	return '<a target="_blank" data-title="'+label+'" href="https://lv.wikipedia.org/wiki/'+href+'">'+replaceAll(label, '_', ' ')+'</a>'
+}
+
+function show_text(data) {
+	console.log(data);
+	//id,text,image,mainlinks
+	//var txt = '<big><b><span id="label">'+create_link('d',data.item,data.itemLabel)+'</span></b></big> ('+create_link('g',parse_name(data.itemLabel),'meklēt')+')';
+	
+	var add = [];
+	
+	//add.push(txt);
+	//add.push();
+	
+	if (data.text && data.text != null)
+		add.push('<b>Pašreizējais fakta teksts</b>:<br><pre id="currTeksts">'+data.text+'<br></pre>');
+	
+	if (data.image && data.image != null)
+		add.push('<b>Pašreizējais fakta attēls</b>:<br>'+createImageThumbnail (data.image,'200')+'');
+	
+	if (data.mainlinks && data.mainlinks != null)
+		add.push('<b>Pašreizējais fakta "galvenais raksts(-i)"</b>:');
+		mainlinks = data.mainlinks;
+		console.log(mainlinks);
+		
+		for (var i = 0; i < mainlinks.length; i++) {
+			add.push('<span data-title="'+mainlinks[i]['name']+'"><input type="checkbox" class="mainlinks" checked /> '+create_lv_link(mainlinks[i]['name'],mainlinks[i]['name']) + "</span>");
+		}
+		
+		//, ensure_ascii=False
+		
+	$('#header-info').html(add.join('<br>'));
+	$('#info-about-fact').val(data.id);
+}
+
+
+function updateCheckboxStatus() {
+	var forOut = [];
+	
+	$('input[type=checkbox]').each(function () {
+		forOut.push([$(this).parent().attr('data-title'),(this.checked ? '1' : '0')]);
+	});
+	
+	return forOut;
+}
+
+function doAPIpostEDIT(factID,newText,checkboxes) {
+
+     $.ajax({
+        type: "post",
+        url: "oauth.php",
+        dataType:"json",
+        data: {'act':'edit','data':{'factID':factID,'newText':newText,'checkboxes':checkboxes}}
+    })
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+			if(response.status === "good") {
+                console.log('yes');
+				$('#only_logged').html( '<div class="alert alert-success" role="alert">Ok!</div>' );
+				$('#fact-editing').html( '' );
+				//$('#currTeksts').html( newText );
+            } else if(response.status === "error") {
+                console.log('no');
+				$('#only_logged').html( '<div class="alert alert-warning" role="alert">Radās kļūda!</div>' );
+            }
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+		});
+}
+
+function doAPIpostNO(currWDitem) {
+
+     $.ajax({
+        type: "post",
+        url: "oauth.php",
+        dataType:"json",
+        data: {'act':'no','data':currWDitem}
+    })
+	.done(function (response) {
+            console.log('dsfsdfsdfsdf');
+			if(response.status === "good") {
+                console.log('yes');
+				$('#only_logged').html( '<div class="alert alert-success" role="alert">Ok!</div>' );
+            } else if(response.status === "error") {
+                console.log('no');
+				$('#only_logged').html( '<div class="alert alert-warning" role="alert">Radās kļūda!</div>' );
+            }
+        })
+	.fail(function (XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest);
+		});
+}
+
+function checkPairs() {
+	$.ajax({
+		type: "GET",
+		url: 'oauth.php',                  //the script to call to get data          
+		data: {'act':'getF'},                        //you can insert url argumnets here to pass to api.php
+		dataType: 'json'                //data format      
+		})
+		.done(function(data1) {          //on recieve of reply
+			console.log('fsfdffsd');
+			console.log(data1);
+			$('#fact-editing').html( '' );
+			show_text(data1);
+		})
+		.fail(function( jqXHR, textStatus ) {
+			console.log( "Request failed: " + textStatus );
+});
+}
+//<!--  <div class="col-md-6"><iframe class='fram' id="if1" src="http://www.sports-reference.com/olympics/athletes/au/pierre-aubameyang-1.html"></iframe></div>
+//  <div class="col-md-6"><iframe class='fram' id="if1" //src="http://www.sports-reference.com/olympics/athletes/au/pierre-emerick-aubameyang-1.html"></iframe></div>
+//-->
+
+function clearValues() {
+	$('.removal').val('');
+	$('#curr-complex-input').prop('checked', false);
+}
+
+$(document).ready(function () {
+//show_text(data[0],data[1],data[2],data[3],data[4]);
+checkPairs();
+
+//$("select[name=class_code]>option[value=" + id + "]").attr("selected", "selected");
+
+$('#btn-check').on('click', function(e) {
+	//e.preventDefault();
+	console.log('clicked-check');
+	checkPairs();
+	//clearValues();
+});
+
+$('#btn-ok').on('click', function(e) {
+	var currWDitem = $('#info-about-fact').val();
+	
+	doAPIpostEDIT(currWDitem,'',updateCheckboxStatus());
+	checkPairs();
+	//clearValues();
+});
+
+$('#btn-no').on('click', function(e) {
+	var currWDitem = $('#info-about-fact').val();
+	doAPIpostNO(currWDitem);
+	checkPairs();
+	//updateCheckboxStatus();
+	//clearValues();
+});
+
+$(document).on('click','#btn-save-fact', function(e) {
+	var currWDitem = $('#currTeksts').text();
+	var newDitem = $('#newText').val();
+	var itemID = $('#info-about-fact').val();
+	
+	
+	if (currWDitem!=newDitem) {
+		//console.log('ok');
+		//console.log(newDitem);
+		doAPIpostEDIT(itemID,newDitem,updateCheckboxStatus());
+		checkPairs();
+		//clearValues();
+	}
+});
+
+$('#btn-edit-fact').on('click', function(e) {
+	var currWDitem = $('#currTeksts').text();
+	console.log(currWDitem);
+	$('#fact-editing').html('<textarea  rows="4" cols="100" id="newText">'+currWDitem+'</textarea><br><span href="#" class="btn btn-success" id="btn-save-fact">Saglabāt (un apstiprināt) faktu</span>');
+});
+
+});
+</script>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand">Sociālie tīkli</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><span id="atlikusie"></span></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><span id="username" class="navbar-text"></span></li>
+        <li><span id="login" class="navbar-text"></span></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+<form class="form-inline buttons-group">
+<span href="#" class="btn btn-primary" id='btn-check'>Pārbaudīt citu</span>
+</form>
+<span id="only_logged"></span>
+<span id="add_status"></span>
+<br>
+<span id="header-info"></span>
+<br>
+<div id="fact-editing"></div>
+<br>
+<span href="#" class="btn btn-success" id='btn-edit-fact'>Labot faktu</span>
+<span href="#" class="btn btn-success" id='btn-ok'>OK</span>
+<span href="#" class="btn btn-danger" id='btn-no'>Nederēs sociālajiem tīkliem!</span>
+</div>
+<span id="info-about-fact" style=" visibility: hidden;"></span>
+</body>
+</html>

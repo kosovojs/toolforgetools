@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+<script type="text/javascript" charset="utf8" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.16/css/jquery.dataTables.min.css">
+<title>Raksti, kas nav latviešu valodas Vikipēdijā, bet ir visvairāk citu valodu Vikipēdijās</title>
+<script>
+function create_wp_link(lang, label) {
+	return '<a target="_blank" href="https://' + lang + '.wikipedia.org/wiki/' + replaceAll(label, ' ', '_') + '">' + label + '</a>'
+}
+
+function create_google_link(label) {
+	return '<a target="_blank" href="https://www.google.com/search?q=' + encodeURIComponent(label) + '">Google</a>'
+}
+
+function replaceAll(str, find, replace) {
+	return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function create_wd_link(href) {
+	return '<a target="_blank" href="https://www.wikidata.org/wiki/' + href + '">' + href + '</a>';
+}
+
+function updateLabel() {
+	$.ajax({
+			type: "get",
+			url: "api.php",
+			dataType: "json"
+		})
+		.done(function(response) {
+			var table = $('#datatable1').DataTable({
+				"aaData": response,
+				"columnDefs": [{
+					"render": function(data) {
+						var lv_or = data.lv;
+						var orig = data.orig;
+						var orig_lang = data.lang;
+
+						if (lv_or == '') {
+							return create_wp_link(orig_lang, orig) + ' <small>(nav iztulkots latviski)</small>';
+						} else {
+							lv1 = lv_or.split("|");
+							var lvs = [];
+							for (a = 0; a < lv1.length; a++) {
+								lvs.push(create_wp_link('lv', lv1[a]) + ' <small>(' + create_google_link(lv1[a]) + ')</small>');
+							}
+							lv = lvs.join(', ');
+							return lv;
+						}
+					},
+					"targets": 0
+				}, {
+					"render": function(data) {
+						return create_wp_link(data.lang, data.orig);
+					},
+					"targets": 1
+				}, {
+					"render": function(data) {
+						return create_wd_link(data.wd);
+					},
+					"targets": 4
+				}],
+				"aoColumns": [{
+						"mDataProp": null
+					},
+					{
+						"mDataProp": null
+					},
+					{
+						"mDataProp": "descr"
+					},
+					{
+						"mDataProp": "iws"
+					},
+					{
+						"mDataProp": null
+					}
+				],
+				"lengthMenu": [
+					[50, 100, 500, 1000, -1],
+					[50, 100, 500, 1000, "All"]
+				],
+				"order": [
+					[3, "desc"]
+				]
+			});
+
+		})
+		.fail(function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Status: " + textStatus);
+			console.log("Error: " + errorThrown);
+			console.log(XMLHttpRequest['responseText']);
+		});
+}
+
+$(document).ready(function() {
+	$(document).ajaxStart(function() {
+		$('#loadingmessage').show();
+		//$('#datatable1').hide();
+	});
+	$(document).ajaxStop(function() {
+		$('#loadingmessage').hide();
+		//$('#datatable1').show();
+	});
+
+	updateLabel();
+	/*
+	$(document).on('click', '.edit', function(){
+    console.log('dfsdfsdf');
+    console.log($(this).data("wd"));
+});
+*/
+});
+</script>
+</head>
+<body>
+<div id='loadingmessage' style='display:none'>
+<div class="alert alert-warning" role="alert">  Uzgaidi brīdi, tiek ielādēti dati!</div>
+</div>
+<table class="table table-striped" id="datatable1">
+    <thead> 
+        <tr>
+            <th>Latviski</th>
+            <th>Citā valodā</th>
+            <th width=40%>Apraksts</th>
+            <th>Starpviki saites</th>
+            <th>Vikidati</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+</body>
+</html>
