@@ -15,8 +15,8 @@ $data = json_decode(file_get_contents('./results.json'), true);
 
 foreach($data as $entry) {
 	[$redlink, $bluelink, $likelyhood] = $entry;
-	if ($likelyhood < 5) {
+	if ($likelyhood < 10) {
 		continue;
 	}
-	$conn->query("insert into suggestion_server (suggestion_title, suggestion_target, suggestion_added, views, statuss, import_id, easy_level) values (?, ?, ?, ?, ?, ?, ?)", [$redlink, $bluelink, date('YmdHis'), 0, 0, 4, $likelyhood]);
+	$conn->query("insert into suggestion_server (suggestion_title, suggestion_target, suggestion_added, views, statuss, import_id, easy_level) values (?, ?, ?, ?, ?, ?, ?)", [$redlink, $bluelink, date('YmdHis'), 0, 0, 7, $likelyhood]);
 }

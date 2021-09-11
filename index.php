@@ -58,7 +58,7 @@ if (isset($_GET['action'])) {
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="https://tools.wmflabs.org/edgars/">Edgars tools</a>
+				<a class="navbar-brand" href="https://edgars.toolforge.org/">Edgars tools</a>
 			</div>
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
@@ -73,24 +73,18 @@ if (isset($_GET['action'])) {
 	<div class="container">
 		<h3>International</h3>
 		<ul>
+			<li><a href="cat_check">Category checker</a></li>
 			<li><a href="ccm">Community Capacity Map</a></li>
 		</ul>
 
 		<h3>lvwiki</h3>
 		<ul>
-			<li><a href="100wikidays">#100wikidays</a></li>
 			<li><a href="reminders">Atgādinājumi</a></li>
 			<li><a href="atveidosana">Atveidošanas pārbaude</a></li>
-			<li><a href="estlat">EST/LAT 100</a></li>
-			<li><a href="future">Nākotne pagātnē</a></li>
-			<li><a href="jury">FIFA Pasaules kauss 2018</a></li>
 			<li><a href="missing">Raksti, kas nav latviešu valodas Vikipēdijā, bet ir visvairāk citu valodu Vikipēdijās</a></li>
 			<li><a href="mvw2020">Balsojums par 2020. gada vērtīgāko vikipēdistu</a></li>
-			<li><a href="npp">NPP</a></li>
-			<li><a href="socialie">DYK faktu tagošana sociālajiem tīkliem</a></li>
-			<li><a href="wle">WLE Latvia karte</a></li>
-			<li><a href="wlm">WLM Latvia</a></li>
-			<li><a href="sakartosana">WP sakārtošana</a></li>
+			<li><a href="rlr">Red link recovery</a></li>
+			<li><a href="wiki-patrol">wiki-patrol</a></li>
 		</ul>
 	</div>
 </body>

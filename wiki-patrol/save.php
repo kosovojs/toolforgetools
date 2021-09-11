@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 
-//header('Content-Type: application/json');
+header('Content-Type: application/json');
 
 date_default_timezone_set('Europe/Riga');
 
@@ -72,11 +72,11 @@ function save_last_good() {
 
 	//echo $URL;
 
-	
+
 	$pg = json_decode ( file_get_contents ( $URL ),true ) ;
 	//var_dump($pg);
 	//exit();
-	
+
 	/* $ch = null;
 	$pg = $oauth->doApiQuery( [
 			"action" => "query",
@@ -88,7 +88,7 @@ function save_last_good() {
 			"rvprop"=> "content",
 			"rvslots"=> "*"
 		], $ch ); */
-	
+
 	$pageTextForsave = $pg['query']['pages'][0]['revisions'][0]['slots']['main']['content'];
 
 	//$pageTextForsave = getPageText($revisionIDToSave);
@@ -96,7 +96,7 @@ function save_last_good() {
 	$summary = "saglabāta lapas versija " . $rev['revid'] . ", kuru " . $rev['timestamp'] . " saglabāja " . $rev['user'];
 
 	$oauth->setPageText($title, $pageTextForsave, $summary);
-	
+
 	/*
 	{"status":"ok","msg":[{"revid":"2544792","parentid":"2374480","minor":"","user":"EdgarsBot","timestamp":"2016-07-12T11:53:02Z","comment":"\/* Izveido\u0161ana *\/Typo labo\u0161ana. Skat\u012bt ar\u012b [[Vikiprojekts:Vikip\u0113dijas uzlabo\u0161ana\/Raksti\/Typo\/Labo\u0161ana|projekta lapu]]"},[{"type":"edit","ns":0,"pageid":248289,"revid":3198075,"old_revid":2544792,"rcid":9215011,"user":"Sommerwind18","bot":false,"new":false,"minor":false,"oldlen":9865,"newlen":9866,"timestamp":"2020-04-04T18:37:24Z","comment":"\/* ievads *\/","redirect":false,"tags":[],"oresscores":{"damaging":{"true":0.142,"false":0.858},"goodfaith":{"true":0.999,"false":0.0010000000000000009}}}]]}
 	*/
@@ -111,7 +111,7 @@ function save_last_good() {
 
 
 
-	
+
 	$patrolTokenObject = $oauth->doApiQuery( [
 		'format' => 'json',
 		'action' => 'query' ,
@@ -130,7 +130,7 @@ function save_last_good() {
 
 	foreach($revisionsForPatrol as $edit) {
 		$ch = null;
-		
+
 
 		$resObj = $oauth->doApiQuery([
 			'format' => 'json',
@@ -149,7 +149,7 @@ function save_last_good() {
 	} else {
 		echo json_encode(['status'=>'ok']);
 	} */
-	
+
 	echo json_encode(['status'=>'ok']);//, 'err'=> $oauth->error, 'txt'=>$pageTextForsave
 
 }
@@ -173,9 +173,9 @@ function get_rc() {
 		'meta' => 'userinfo',
 		'uiprop' => 'blockinfo|groups|rights'
 	], $ch ); */
-	
+
 	//echo json_encode($res);
-	
+
 	//var_dump($res );
 
 	if (!$oauth->isAuthOK()) {
@@ -206,7 +206,7 @@ function get_rc() {
 
 function patrol_edits() {
 	global $oauth;
-	
+
 	if (!$oauth->isAuthOK()) {
 		echo json_encode(['status'=>'error', 'msg'=> 'lietotājs nav autentificējies']);
 		return;
@@ -234,7 +234,7 @@ function patrol_edits() {
 	$wasError = false;
 
 	foreach($edits as $edit) {
-		$ch = null;/* 
+		$ch = null;/*
 		$actionObj = new stdClass();
 		$actionObj->action = 'patrol';
 		$actionObj->format = 'json';
