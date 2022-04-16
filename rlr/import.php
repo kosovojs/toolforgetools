@@ -18,5 +18,5 @@ foreach($data as $entry) {
 	if ($likelyhood < 10) {
 		continue;
 	}
-	$conn->query("insert into suggestion_server (suggestion_title, suggestion_target, suggestion_added, views, statuss, import_id, easy_level) values (?, ?, ?, ?, ?, ?, ?)", [$redlink, $bluelink, date('YmdHis'), 0, 0, 7, $likelyhood]);
+	$conn->query("insert into suggestion_server (suggestion_title, suggestion_target, suggestion_added, views, statuss, import_id, easy_level) values (?, ?, ?, ?, ?, ?, ?)", [$redlink, $bluelink, date('YmdHis'), 0, 0, 10, $likelyhood]);
 }

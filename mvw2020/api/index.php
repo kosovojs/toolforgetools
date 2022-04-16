@@ -41,48 +41,48 @@ save_to_db($tips, $data);
 function save_to_db($tips, $data)
 {
     global $conn, $oauth;
-    
+
     if ( !$oauth->isAuthOK() ) {
         echo json_encode(['status'=>'error','msg'=>'Tu neesi ielogojies!']);
         return;
 	}
-	
+
     if (($tips === 'first' && sizeof($data)>15) || ($tips === 'second' && sizeof($data)>3) || ($tips === 'newbie' && sizeof($data)>3)) {
         echo json_encode(['status'=>'error','msg'=>'Norādīts pārāk daudz dalībnieku!']);
         return;
     }
-    
+
     $user_data = $oauth->getConsumerRights();
     $user = $user_data->query->userinfo->name;
-    
+
     $isUserAlready = $conn->query("SELECT id FROM mvw_2020_pirma WHERE voter=? and phase=? limit 1", [$user,$tips])->fetch("assoc");
-    
+
     if ($isUserAlready) {
         echo json_encode(['status'=>'error','msg'=>'Tu jau esi nobalsojis!']);
         return;
     }
-    
+
     $curTime = date("YmdHis");
-    
+
     $theSQL = "insert into mvw_2020_pirma (username, voter, vote_time, phase) values (?, ?, ?, ?)";
-    
+
     $paramsToAdd = [];
-    
+
     foreach ($data as $userAdd) {
         /* if (!is_numeric($userAdd)) {
             echo json_encode(['status'=>'error','msg'=>'Kāda no vērtībām nav cipars!']);
             return;
         } */
-        
+
         $paramsToAdd[] = [$userAdd,$user,$curTime,$tips];
     }
-    
+
     try {
         $conn->atomicQuery($theSQL, $paramsToAdd);
     } catch (mysqli_sql_exception $e) {
         echo json_encode(['status'=>'error','msg'=>'Radās kļūda, saglabājot datus. Mēģini vēlreiz!']);
         return;
     }
-    
+
     echo json_encode(['status'=>'success','msg'=>'Paldies, balsojums pieņemts!']);
 }

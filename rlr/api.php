@@ -101,7 +101,7 @@ function getNextSuggestion() {
 	// and easy_level>12
 	$title = $conn->query("SELECT distinct suggestion_title from suggestion_server
 	WHERE  (statuss=0 or statuss is null)   AND (views<3 or views is null) and resolved_time is null
-	and import_id=7
+	and import_id=10 and easy_level>0
 
 	ORDER BY rand() limit 1")->fetch('assoc')['suggestion_title'];
 	//
